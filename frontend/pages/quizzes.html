@@ -1,0 +1,77 @@
+<!-- frontend/pages/quizzes.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyBloom - Quizzes</title>
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <!-- Page-Specific Styles -->
+    <link rel="stylesheet" href="../css/quizzes.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- This will be replaced with the shared sidebar -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- Quizzes-specific content will be injected here -->
+      <script type="text/template" id="page-content">
+        <!-- Header -->
+        <header class="header">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Quizzes</h1>
+          <a href="#" class="logout-btn">Log out</a>
+        </header>
+
+        <!-- Welcome Message -->
+        <div class="welcome-section">
+          <h2>Hello, <span id="username">taca</span>!</h2>
+        </div>
+
+        <!-- Quizzes Section -->
+        <div class="quizzes-container">
+          <p class="instruction">Choose your summary file</p>
+
+          <!-- Search Bar -->
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="File name" id="file-search" />
+            <button class="search-btn">Search</button>
+          </div>
+
+          <!-- Generate Options -->
+          <div class="generate-options">
+            <div class="option-card">
+              <div class="icon">
+                <i class="fas fa-book-open"></i>
+              </div>
+              <h3>Flashcard</h3>
+              <button class="generate-btn">Generate</button>
+            </div>
+
+            <div class="option-card">
+              <div class="icon">
+                <i class="fas fa-list-alt"></i>
+              </div>
+              <h3>Quizzes</h3>
+              <button class="generate-btn">Generate</button>
+            </div>
+          </div>
+        </div>
+      </script>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="../js/main.js"></script>
+    <!-- Page-Specific JS -->
+    <script src="../js/quizzes.js"></script>
+  </body>
+</html>

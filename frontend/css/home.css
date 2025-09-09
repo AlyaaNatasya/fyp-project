@@ -1,0 +1,252 @@
+/* frontend/css/home.css */
+
+/* Navigation */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.nav-logo i {
+  margin-right: 15px;
+  font-size: 3rem;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-dark);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--text-light);
+}
+
+/* Main Content */
+.main-content {
+  display: flex;
+  margin-top: 50px;
+  gap: 50px;
+}
+
+/* App Description */
+.app-description {
+  flex: 1;
+  padding-right: 30px;
+}
+
+.app-description h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+  line-height: 1.2;
+}
+
+.app-description p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  color: #666;
+}
+
+.read-more-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.read-more-btn:hover {
+  background-color: #a67c52;
+}
+
+/* Auth Container */
+.auth-container {
+  flex: 1;
+  background-color: var(--primary-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 30px;
+  max-width: 450px;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: var(--transition);
+}
+
+.auth-tab.active {
+  color: var(--primary-bg);
+  border-bottom: 2px solid var(--primary-bg);
+}
+
+/* Auth Forms */
+.auth-form {
+  display: none;
+}
+
+.auth-form.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.form-group input:focus {
+  border-color: var(--primary-bg);
+  outline: none;
+}
+
+.password-input {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  color: var(--text-light);
+}
+
+.remember-me input {
+  margin-right: 8px;
+}
+
+.forgot-password {
+  text-decoration: none;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.auth-btn {
+  width: 100%;
+  background-color: var(--primary-bg);
+  color: var(--text-dark);
+  border: none;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.auth-btn:hover {
+  background-color: #f8d5a3;
+}
+
+.auth-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: var(--radius);
+  text-align: center;
+  display: none;
+}
+
+.auth-message.error {
+  background-color: #ffcccb;
+  color: #d32f2f;
+  display: block;
+}
+
+.auth-message.success {
+  background-color: #c8e6c9;
+  color: #388e3c;
+  display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .app-description {
+    padding-right: 0;
+    margin-bottom: 30px;
+  }
+
+  .nav-logo {
+    font-size: 2rem;
+  }
+
+  .nav-logo i {
+    font-size: 2.5rem;
+  }
+
+  .app-description h1 {
+    font-size: 2rem;
+  }
+
+  .auth-container {
+    max-width: 100%;
+  }
+}
