@@ -1,0 +1,72 @@
+<!-- frontend/pages/summary.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyBloom - Summary</title>
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <!-- Page-Specific Styles -->
+    <link rel="stylesheet" href="../css/summary.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- This will be replaced with the shared sidebar -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- Summary-specific content will be injected here -->
+      <script type="text/template" id="page-content">
+        <!-- Header -->
+        <header class="header">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Summary</h1>
+          <a href="#" class="logout-btn">Log out</a>
+        </header>
+
+        <!-- Welcome Message -->
+        <div class="welcome-section">
+          <h2>Hello, <span id="username">User</span>!</h2>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-container">
+          <div class="notes-section">
+            <h3>Actual notes</h3>
+            <div id="actual-notes" class="notes-box">
+              <!-- Your uploaded file content will appear here -->
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <h3>Summary notes</h3>
+            <div id="summary-output" class="summary-box">
+              <!-- AI-generated summary will appear here -->
+            </div>
+
+            <div class="action-buttons">
+              <button class="save-btn">
+                <i class="fas fa-bookmark"></i> Save to collection
+              </button>
+              <button class="mindmap-btn">
+                <i class="fas fa-brain"></i> Generate mind map
+              </button>
+            </div>
+          </div>
+        </div>
+      </script>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="../js/main.js"></script>
+    <!-- Page-Specific JS -->
+    <script src="../js/summary.js"></script>
+  </body>
+</html>
