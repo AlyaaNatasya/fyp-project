@@ -1,0 +1,139 @@
+/* frontend/css/timer.css */
+
+/* Main Content - White Background */
+.main-content {
+  margin-left: 250px;
+  padding: 20px 50px;
+  min-height: 100vh;
+  background-color: var(--primary-bg);
+  transition: margin-left 0.3s ease;
+  color: var(--text-dark);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #c1946e;
+  margin-bottom: 40px;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 5px;
+}
+
+.menu-toggle:hover {
+  color: #a67c52;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--primary-color);
+}
+
+.logout-btn {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  background-color: white;
+  transition: var(--transition);
+}
+
+.logout-btn:hover {
+  background-color: #f8d5a3;
+}
+
+/* Welcome Section */
+.welcome-section {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.welcome-section h2 {
+  font-size: 2rem;
+  color: var(--text-dark);
+}
+
+.welcome-section span {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* Timer Container */
+.timer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Instruction Text */
+.instruction {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+  margin-bottom: 50px;
+}
+
+/* Mode Grid */
+.mode-grid {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+/* Mode Card */
+.mode-card {
+  width: 150px;
+  height: 150px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.mode-card i {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.mode-card h3 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.mode-card:hover {
+  transform: translateY(-5px);
+  background-color: #a67c52;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .mode-grid {
+    flex-direction: column;
+    gap: 30px;
+  }
+}
