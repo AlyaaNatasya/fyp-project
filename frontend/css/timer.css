@@ -125,6 +125,90 @@
   background-color: #a67c52;
 }
 
+/* Timer Screen */
+.timer-screen {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.timer-screen h2 {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 30px;
+}
+
+.timer-display {
+  font-size: 5rem;
+  font-weight: bold;
+  color: var(--text-dark);
+  margin: 20px 0;
+  font-family: monospace;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.timer-btn {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.start {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.start:hover {
+  background-color: #a67c52;
+}
+
+.reset {
+  background-color: #ddd;
+  color: #333;
+}
+
+.reset:hover {
+  background-color: #ccc;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: color 0.3s;
+}
+
+.back-btn:hover {
+  color: #a67c52;
+  text-decoration: underline;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
@@ -135,5 +219,14 @@
   .mode-grid {
     flex-direction: column;
     gap: 30px;
+  }
+
+  .timer-display {
+    font-size: 3.5rem;
+  }
+
+  .timer-controls {
+    flex-direction: column;
+    align-items: center;
   }
 }
