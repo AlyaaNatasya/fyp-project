@@ -12,12 +12,12 @@
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     />
   </head>
   <body>
     <div class="dashboard-container">
-      <!-- This will be replaced with the shared sidebar -->
+      <!-- This will be replaced with the real sidebar -->
       <div id="sidebar-placeholder"></div>
 
       <!-- Timer-specific content will be injected here -->
@@ -36,8 +36,8 @@
           <h2>Hello, <span id="username">taca</span>!</h2>
         </div>
 
-        <!-- Timer Mode Selection -->
-        <div class="timer-container">
+        <!-- Mode Selection Screen -->
+        <div class="timer-container" id="mode-selection">
           <p class="instruction">Select mode timer</p>
 
           <div class="mode-grid">
@@ -47,7 +47,7 @@
             </div>
 
             <div class="mode-card pomodoro" data-mode="pomodoro">
-              <i class="fas fa-tomato"></i>
+              <i class="fa-regular fa-clock"></i>
               <h3>Pomodoro</h3>
             </div>
 
@@ -56,6 +56,19 @@
               <h3>Focus</h3>
             </div>
           </div>
+        </div>
+
+        <!-- Timer Screen (hidden by default) -->
+        <div class="timer-screen" id="timer-screen" style="display: none;">
+          <h2 id="timer-mode">Speed Mode</h2>
+          <div class="timer-display">
+            <span id="minutes">05</span>:<span id="seconds">00</span>
+          </div>
+          <div class="timer-controls">
+            <button id="start-pause-btn" class="timer-btn start">Start</button>
+            <button id="reset-btn" class="timer-btn reset">Reset</button>
+          </div>
+          <button id="back-btn" class="back-btn">← Back to Modes</button>
         </div>
       </script>
     </div>
