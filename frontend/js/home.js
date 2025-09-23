@@ -82,7 +82,11 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("token", data.token); // ✅ Save token
         setTimeout(() => (window.location.href = "dashboard.html"), 1000);
       } else {
-        showMessage(signupMessage, data.message || "Signup failed", "error");
+        const errorMessage = data.message || "Signup failed";
+        const errorDetails = data.errors
+          ? data.errors.map((e) => e.msg).join(", ")
+          : "";
+        showMessage(signupMessage, `${errorMessage} ${errorDetails}`, "error"); // Fixed this line
       }
     } catch (err) {
       console.error("Network error:", err);
@@ -109,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       const data = await response.json();
+      console.log("Server response:", data);
 
       if (response.ok) {
         showMessage(
