@@ -4,6 +4,7 @@ const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
+const e = require("express");
 require("dotenv").config();
 
 // Validation middleware
@@ -39,8 +40,10 @@ const validateLogin = [
 
 // SIGNUP
 const signup = async (req, res) => {
+  console.log("Signup request body:", req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("Validation errors:", errors.array());
     return res.status(400).json({
       message: "Validation failed",
       errors: errors.array(),
@@ -48,6 +51,7 @@ const signup = async (req, res) => {
   }
 
   const { name, email, password } = req.body;
+  console.log("Received signup data:", { name, email });
 
   try {
     // Check if user already exists
@@ -55,6 +59,7 @@ const signup = async (req, res) => {
       "SELECT id, email FROM users WHERE email = ?",
       [email]
     );
+    console.log("Existing user check:", existing);
     if (existing.length > 0) {
       return res.status(409).json({
         message: "User with this email already exists.",
@@ -64,25 +69,39 @@ const signup = async (req, res) => {
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    console.log("Password hashed successfully");
 
     // Insert new user
     const [result] = await pool.execute(
       "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
       [name, email, hashedPassword]
     );
+    console.log("User inserted, result:", result);
 
     const userId = result.insertId;
+    console.log("New user ID:", userId);
 
     // Generate JWT token
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        name: user.name, // ✅ This is correct
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    let token;
+    try {
+      console.log("Generating JWT with:", { userId, email, name });
+      console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
+
+      token = jwt.sign(
+        {
+          id: userId,
+          email: email,
+          name: name,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      console.log("JWT generated successfully");
+    } catch (jwtError) {
+      console.error("JWT generation error:", jwtError);
+      throw new Error(`JWT Error: ${jwtError.message}`);
+    }
+    console.log("JWT token generated");
 
     // Respond with success
     res.status(201).json({
