@@ -1,8 +1,4 @@
 /* frontend/css/calendar.css */
-/* ==========================================
-   CALENDAR-SPECIFIC STYLES ONLY
-   (No shared sidebar styles — they're in main.css)
-   ========================================== */
 
 /* Main Content - White Background */
 .main-content {
@@ -191,6 +187,7 @@
 .reminder-card {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Space between info and buttons */
   gap: 10px;
   padding: 12px 20px;
   border-radius: var(--radius);
@@ -206,22 +203,52 @@
   color: #a67c52;
 }
 
-.reminder-card .due-date {
-  font-size: 1rem;
-  color: var(--text-dark);
-  font-weight: 500;
+.reminder-info {
+  flex: 1;
+  text-align: left;
 }
 
-.reminder-card .category {
-  font-size: 0.9rem;
+.reminder-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btn-icon {
+  background-color: white;
+  border: 1px solid var(--primary-color);
   color: var(--primary-color);
-  font-weight: bold;
-  margin-right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.reminder-card:hover {
-  background-color: #f0f0f0;
-  transform: translateY(-1px);
+.btn-icon:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-icon i {
+  font-size: 0.9rem;
+}
+
+/* Responsive: Stack buttons on small screens */
+@media (max-width: 480px) {
+  .reminder-actions {
+    flex-direction: column;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* Modal */
@@ -319,73 +346,5 @@
   .calendar-section h3,
   .reminders-section h3 {
     font-size: 1.8rem;
-  }
-}
-/* Reminder Actions (Edit & Delete Buttons) */
-.reminder-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Space between info and buttons */
-  gap: 10px;
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  background-color: #f9f9f9;
-  border-left: 4px solid var(--primary-color);
-  position: relative;
-}
-
-.reminder-card i {
-  font-size: 1.5rem;
-  color: #a67c52;
-}
-
-.reminder-info {
-  flex: 1;
-  text-align: left;
-}
-
-.reminder-actions {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-}
-
-.btn-icon {
-  background-color: white;
-  border: 1px solid var(--primary-color);
-  color: var(--primary-color);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.btn-icon:hover {
-  background-color: var(--primary-color);
-  color: white;
-  transform: translateY(-2px);
-}
-
-.btn-icon i {
-  font-size: 0.9rem;
-}
-
-/* Responsive: Stack buttons on small screens */
-@media (max-width: 480px) {
-  .reminder-actions {
-    flex-direction: column;
-  }
-
-  .btn-icon {
-    width: 32px;
-    height: 32px;
   }
 }
