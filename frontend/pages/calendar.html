@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css "
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
   </head>
   <body class="fade-in">
@@ -24,73 +24,73 @@
       <script type="text/template" id="page-content">
         <!-- Header -->
         <header class="header">
-            <button class="menu-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h1>Calendar</h1>
-            <a href="#" class="logout-btn">Log out</a>
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Calendar</h1>
+          <a href="#" class="logout-btn">Log out</a>
         </header>
 
         <!-- Welcome Message -->
         <div class="welcome-section">
-            <h2>Hello, <span id="username">User</span>!</h2>
+          <h2>Hello, <span id="username">User</span>!</h2>
         </div>
 
         <!-- Calendar and Reminders -->
         <div class="calendar-container">
-            <div class="calendar-section">
-                <h3>Calendar</h3>
-                <p>Choose the date</p>
-                <div class="calendar-header">
-                    <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-                    <h3 id="month-year"></h3>
-                    <button id="next-month"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div id="calendar"></div>
+          <div class="calendar-section">
+            <h3>Calendar</h3>
+            <p>Choose the date</p>
+            <div class="calendar-header">
+              <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+              <h3 id="month-year"></h3>
+              <button id="next-month"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div class="reminders-section">
-                <h3>Reminders</h3>
-                <p>Alert!!</p>
-                <div id="reminder-list" class="scrollable">
-                    <!-- Reminders will be added dynamically -->
-                </div>
+            <div id="calendar"></div>
+          </div>
+          <div class="reminders-section">
+            <h3>Reminders</h3>
+            <p>Alert!!</p>
+            <div id="reminder-list" class="scrollable">
+              <!-- Reminders will be added dynamically -->
             </div>
+          </div>
         </div>
 
         <!-- Modal for Adding/Editing Reminders -->
         <div id="reminder-modal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Add/Edit Reminder</h2>
-                <form id="reminder-form">
-                    <input type="hidden" id="reminder-id">
-                    <div class="form-group">
-                        <label for="reminder-title">Title</label>
-                        <input type="text" id="reminder-title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reminder-description">Description</label>
-                        <textarea id="reminder-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="reminder-category">Category</label>
-                        <select id="reminder-category" onchange="toggleCustomCategory(this)">
-                            <option value="">Select Category</option>
-                            <option value="exam">Exam</option>
-                            <option value="quiz">Quiz</option>
-                            <option value="activity">Activity</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                        <input type="text" id="custom-category" placeholder="Enter custom category" style="display: none;">
-                    </div>
-                    <!-- Display selected date -->
-                    <div class="form-group">
-                        <label>Selected Date</label>
-                        <p id="selected-date" style="font-weight: bold; color: #c1946e;">-</p>
-                    </div>
-                    <button type="submit" class="auth-btn">Save Reminder</button>
-                </form>
-            </div>
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add/Edit Reminder</h2>
+            <form id="reminder-form">
+              <input type="hidden" id="reminder-id" />
+              <div class="form-group">
+                <label for="reminder-title">Title</label>
+                <input type="text" id="reminder-title" required />
+              </div>
+              <div class="form-group">
+                <label for="reminder-description">Description</label>
+                <textarea id="reminder-description" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="reminder-category">Category</label>
+                <select id="reminder-category" onchange="toggleCustomCategory(this)">
+                  <option value="">Select Category</option>
+                  <option value="exam">Exam</option>
+                  <option value="quiz">Quiz</option>
+                  <option value="activity">Activity</option>
+                  <option value="custom">Custom</option>
+                </select>
+                <input type="text" id="custom-category" placeholder="Enter custom category" style="display: none;" />
+              </div>
+              <!-- Display selected date -->
+              <div class="form-group">
+                <label>Selected Date</label>
+                <p id="selected-date" style="font-weight: bold; color: #c1946e;">-</p>
+              </div>
+              <button type="submit" class="auth-btn">Save Reminder</button>
+            </form>
+          </div>
         </div>
       </script>
     </div>
