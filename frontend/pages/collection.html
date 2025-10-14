@@ -1,0 +1,58 @@
+<!-- frontend/pages/collection.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyBloom - Collection</title>
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <!-- Page-Specific Styles -->
+    <link rel="stylesheet" href="../css/collection.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- This will be replaced with the shared sidebar -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- Collection-specific content will be injected here -->
+      <script type="text/template" id="page-content">
+        <!-- Header -->
+        <header class="header">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Collection</h1>
+          <a href="#" class="logout-btn">Log out</a>
+        </header>
+
+        <!-- Welcome Message -->
+        <div class="welcome-section">
+          <h2>Hello, <span id="username">taca</span>!</h2>
+        </div>
+
+        <!-- Collection Section -->
+        <div class="collection-container">
+          <div class="collection-header">
+            <h3>Collection Notes</h3>
+          </div>
+
+          <!-- Empty State or Notes List -->
+          <div class="notes-list">
+            <p class="empty-message">No notes saved yet. Add your first note by uploading in Summary or Quizzes.</p>
+          </div>
+        </div>
+      </script>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="../js/main.js"></script>
+    <!-- Page-Specific JS -->
+    <script src="../js/collection.js"></script>
+  </body>
+</html>
