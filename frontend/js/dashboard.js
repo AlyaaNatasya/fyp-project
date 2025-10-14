@@ -5,7 +5,8 @@
  * All shared logic (auth, sidebar, username, logout) is in main.js
  */
 
-document.addEventListener("DOMContentLoaded", function () {
+// Define the dashboard initialization function that will be called by main.js
+window.initDashboardPage = function() {
   // --- Dashboard Card Buttons ---
   document.querySelectorAll(".card-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
@@ -13,19 +14,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
       switch (action) {
         case "summary":
-          alert("Redirecting to Summary Generator...");
+          window.location.href = "../pages/summary.html";
           break;
 
         case "quizzes":
-          alert("Redirecting to Quiz Builder...");
+          window.location.href = "../pages/quizzes.html";
           break;
 
         case "study timer":
-          alert("Starting Study Timer...");
+          window.location.href = "../pages/timer.html";
           break;
 
         case "reminder":
-          alert("Opening Reminder Dashboard...");
+          window.location.href = "../pages/calendar.html";
           break;
 
         default:
@@ -33,4 +34,16 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+};
+
+// For backward compatibility or direct loading
+document.addEventListener("DOMContentLoaded", function () {
+  // Check if content has already been loaded by main.js
+  if (document.querySelector(".main-content")) {
+    // Content already loaded, initialize immediately
+    window.initDashboardPage();
+  } else {
+    // Wait for main.js to load content
+    // The main.js will call initDashboardPage after content injection
+  }
 });
