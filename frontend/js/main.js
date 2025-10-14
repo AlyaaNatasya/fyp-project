@@ -120,10 +120,10 @@ function initPageAfterLoad() {
       window.initUploadNotePage();
     }
 
-    // ✅ If you add dashboard.js later:
-    // if (currentPage === "dashboard.html" && typeof window.initDashboardPage === "function") {
-    //   window.initDashboardPage();
-    // }
+    // ✅ Initialize Dashboard Page
+    if (currentPage === "dashboard.html" && typeof window.initDashboardPage === "function") {
+      window.initDashboardPage();
+    }
   } catch (err) {
     console.warn("Invalid token:", err);
     localStorage.removeItem("token");
