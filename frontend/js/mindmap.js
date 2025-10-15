@@ -37,6 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // You can add logic here later to generate mind maps from saved notes
-  // For now, we just show a clean canvas
+  // Optional: Retrieve last summary
+  const lastSummary = localStorage.getItem("studybloom-last-summary");
+  if (lastSummary) {
+    console.log("Last summary loaded for mind map generation:", lastSummary);
+    // You can pass this to D3.js or vis.js later to build a real mind map
+  }
 });

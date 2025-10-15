@@ -108,10 +108,14 @@ function initSummaryPage() {
     window.location.href = "../pages/collection.html"; // Redirect to collection page
   });
 
-  // Generate Mind Map
+  // Generate Mind Map → Go to Mind Map Page
   mindmapBtn?.addEventListener("click", () => {
-    alert(
-      "Mind map generated! In the real app, this would create a visual diagram."
-    );
+    // Optionally save the summary first
+    const summaryText = summaryOutput.innerText.trim();
+    localStorage.setItem("studybloom-last-summary", summaryText);
+
+    // Redirect to mind map page
+    alert("Generating mind map...");
+    window.location.href = "../pages/mindmap.html";
   });
 }
