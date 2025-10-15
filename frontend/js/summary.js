@@ -2,10 +2,21 @@
 
 /**
  * This file handles the summary page logic
- * All shared logic (sidebar, auth, hamburger, logout) is in main.js
+ * All shared logic (auth, sidebar, username, logout) is in main.js
  */
 
 document.addEventListener("DOMContentLoaded", function () {
+  // ✅ Wait for .main-content to exist before running logic
+  const mainContentCheck = setInterval(() => {
+    const mainContent = document.querySelector(".main-content");
+    if (mainContent) {
+      clearInterval(mainContentCheck);
+      initSummaryPage(); // Now safe to run
+    }
+  }, 100);
+});
+
+function initSummaryPage() {
   const token = localStorage.getItem("token");
   const usernameSpan = document.getElementById("username");
 
@@ -69,15 +80,38 @@ document.addEventListener("DOMContentLoaded", function () {
   // Generate summary on load
   generateSummary();
 
-  // Save to Collection
-  saveBtn.addEventListener("click", () => {
+  // Save to Collection → Save & Go to Collection Page
+  saveBtn?.addEventListener("click", () => {
+    // Get the current summary text
+    const summaryText = summaryOutput.innerText.trim();
+
+    // Load existing collection from localStorage
+    let collection =
+      JSON.parse(localStorage.getItem("studybloom-collection")) || [];
+
+    // Create new note object
+    const newNote = {
+      id: Date.now().toString(),
+      title: "Web Development Summary",
+      content: summaryText,
+      date: new Date().toISOString(),
+    };
+
+    // Add to collection
+    collection.push(newNote);
+
+    // Save back to localStorage
+    localStorage.setItem("studybloom-collection", JSON.stringify(collection));
+
+    // Show confirmation and redirect
     alert("Summary saved to your collection!");
+    window.location.href = "../pages/collection.html"; // Redirect to collection page
   });
 
   // Generate Mind Map
-  mindmapBtn.addEventListener("click", () => {
+  mindmapBtn?.addEventListener("click", () => {
     alert(
       "Mind map generated! In the real app, this would create a visual diagram."
     );
   });
-});
+}
