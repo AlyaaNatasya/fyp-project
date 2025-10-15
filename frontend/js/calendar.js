@@ -12,7 +12,7 @@ let reminders = JSON.parse(localStorage.getItem("studybloom-reminders")) || [];
 function editReminder(reminder) {
   const reminderModal = document.getElementById("reminder-modal");
   const reminderForm = document.getElementById("reminder-form");
-  const selectedDateDisplay = document.getElementById("selected-date");
+  const reminderDateInput = document.getElementById("reminder-date");
 
   // Reset form
   reminderForm.reset();
@@ -38,8 +38,8 @@ function editReminder(reminder) {
 
   // Set date
   const selectedDate = new Date(reminder.date);
-  window.selectedDateForModal = selectedDate;
-  selectedDateDisplay.textContent = formatDate(selectedDate);
+  const dateString = selectedDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  reminderDateInput.value = dateString;
 
   // Show modal
   reminderModal.classList.add("active");
@@ -49,7 +49,7 @@ function setupReminderModal() {
   const reminderModal = document.getElementById("reminder-modal");
   const closeModal = reminderModal.querySelector(".close");
   const reminderForm = document.getElementById("reminder-form");
-  const selectedDateDisplay = document.getElementById("selected-date");
+  const reminderDateInput = document.getElementById("reminder-date");
 
   // Close modal
   closeModal?.addEventListener("click", () => {
@@ -81,13 +81,14 @@ function setupReminderModal() {
       categorySelect.value === "custom"
         ? document.getElementById("custom-category").value.trim()
         : categorySelect.value;
+    const dateStr = reminderDateInput.value; // Get date from input
 
-    const date = window.selectedDateForModal;
-
-    if (!title || !date) {
+    if (!title || !dateStr) {
       alert("Title and date are required.");
       return;
     }
+
+    const date = new Date(dateStr); // Convert to Date object
 
     const reminder = {
       id: window.editingReminder
@@ -111,7 +112,6 @@ function setupReminderModal() {
 
     // Clear globals
     window.editingReminder = null;
-    window.selectedDateForModal = null;
   });
 
   // Initialize openReminderModal
@@ -120,12 +120,15 @@ function setupReminderModal() {
 
     const reminderModal = document.getElementById("reminder-modal");
     const reminderForm = document.getElementById("reminder-form");
-    const selectedDateDisplay = document.getElementById("selected-date");
+    const reminderDateInput = document.getElementById("reminder-date");
 
     reminderForm.reset();
-    window.selectedDateForModal = date;
     window.editingReminder = null;
-    selectedDateDisplay.textContent = formatDate(date);
+
+    // Format date for input
+    const dateString = date.toISOString().split("T")[0];
+    reminderDateInput.value = dateString;
+
     reminderModal.classList.add("active");
   };
 }
