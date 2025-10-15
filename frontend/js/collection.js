@@ -37,6 +37,50 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // You can add logic here later to load saved notes from localStorage or backend
-  // For now, we show an empty state message
+  // Load and display saved notes
+  loadCollection();
 });
+
+function loadCollection() {
+  const notesList = document.querySelector(".notes-list");
+  if (!notesList) return;
+
+  // Get collection from localStorage
+  const collection =
+    JSON.parse(localStorage.getItem("studybloom-collection")) || [];
+
+  if (collection.length === 0) {
+    notesList.innerHTML = `
+      <p class="empty-message">No notes saved yet. Add your first note by uploading in Summary or Quizzes.</p>
+    `;
+    return;
+  }
+
+  // Clear empty message
+  notesList.innerHTML = "";
+
+  // Sort by date (newest first)
+  const sorted = collection.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // Add each note as a card
+  sorted.forEach((note) => {
+    const noteCard = document.createElement("div");
+    noteCard.classList.add("collection-note");
+    noteCard.innerHTML = `
+      <h4>${note.title}</h4>
+      <small>${formatDate(new Date(note.date))}</small>
+      <p>${note.content.substring(0, 150)}${
+      note.content.length > 150 ? "..." : ""
+    }</p>
+    `;
+    notesList.appendChild(noteCard);
+  });
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}

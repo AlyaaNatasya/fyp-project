@@ -114,6 +114,35 @@
   opacity: 0.8;
 }
 
+/* Collection Note Card */
+.collection-note {
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin: 15px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+}
+
+.collection-note h4 {
+  margin: 0 0 5px 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+.collection-note small {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.collection-note p {
+  margin: 10px 0 0 0;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
