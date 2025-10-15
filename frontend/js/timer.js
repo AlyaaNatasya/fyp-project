@@ -61,6 +61,7 @@ function initTimerPage() {
 
   let timer;
   let totalSeconds = 0;
+  let initialSeconds = 0; // ✅ Store initial time
   let isRunning = false;
 
   // --- Timer Mode Selection ---
@@ -78,13 +79,14 @@ function initTimerPage() {
 
       // Set duration based on mode
       if (mode === "speed") {
-        totalSeconds = 5 * 60; // 5 minutes
+        initialSeconds = 5 * 60; // 5 minutes
       } else if (mode === "pomodoro") {
-        totalSeconds = 25 * 60; // 25 minutes
+        initialSeconds = 25 * 60; // 25 minutes
       } else if (mode === "focus") {
-        totalSeconds = 50 * 60; // 50 minutes
+        initialSeconds = 50 * 60; // 50 minutes
       }
 
+      totalSeconds = initialSeconds; // ✅ Set current time to initial
       updateTimerDisplay();
       resetTimer();
     });
@@ -151,6 +153,9 @@ function initTimerPage() {
     startPauseBtn.textContent = "Start";
     startPauseBtn.classList.remove("pause");
     startPauseBtn.classList.add("start");
+
+    // ✅ Reset time back to original value
+    totalSeconds = initialSeconds;
     updateTimerDisplay();
   }
 }
