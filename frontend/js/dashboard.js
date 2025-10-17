@@ -44,55 +44,95 @@ function showUpcomingReminders() {
   const notificationSection = document.getElementById("upcoming-reminders");
   if (!notificationSection) return;
 
-  // Get reminders from localStorage
-  let reminders = JSON.parse(localStorage.getItem("studybloom-reminders")) || [];
-  
-  // Filter reminders that are due tomorrow (1 day before due date)
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  
-  // Format tomorrow to YYYY-MM-DD to compare with reminder dates
-  const tomorrowString = tomorrow.toISOString().split('T')[0];
-  
-  const upcomingReminders = reminders.filter(reminder => {
-    const reminderDate = new Date(reminder.date);
-    const reminderDateString = reminderDate.toISOString().split('T')[0];
-    return reminderDateString === tomorrowString;
-  });
-  
-  // Format the date as a readable string
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const formattedDate = tomorrow.toLocaleDateString('en-US', options);
-  
-  if (upcomingReminders.length > 0) {
-    notificationSection.innerHTML = `
-      <h3><i class="fas fa-bell"></i> Reminders due tomorrow (${formattedDate})</h3>
-    `;
-    
-    upcomingReminders.forEach(reminder => {
-      const reminderElement = document.createElement("div");
-      reminderElement.className = "reminder-item";
+  // Get reminders from the API
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No authentication token found");
+    return;
+  }
+
+  fetch("http://localhost:5000/api/reminders", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const reminders = data.reminders || [];
       
-      const categoryLabel = reminder.category ? 
-        `<span class="category-badge" style="background-color: #e2e2e2; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${reminder.category}</span>` 
-        : "";
+      // Filter reminders that are due tomorrow (1 day before due date)
+      // Create date strings for comparison to avoid timezone issues
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
       
-      reminderElement.innerHTML = `
-        <div class="reminder-info">
-          <strong>${reminder.title}</strong>
-          ${categoryLabel}
-        </div>
-        <div class="date">${new Date(reminder.date).toLocaleDateString()}</div>
+      // Format dates consistently: YYYY-MM-DD
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      const tomorrowString = formatDate(tomorrow);
+      
+      const upcomingReminders = reminders.filter(reminder => {
+        // Parse the reminder date and format it consistently
+        const reminderDate = new Date(reminder.date);
+        const reminderDateString = formatDate(reminderDate);
+        return reminderDateString === tomorrowString;
+      });
+      
+      // Format the date as a readable string
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const formattedDate = tomorrow.toLocaleDateString('en-US', options);
+      
+      if (upcomingReminders.length > 0) {
+        notificationSection.innerHTML = `
+          <h3><i class="fas fa-bell"></i> Reminders due tomorrow (${formattedDate})</h3>
+        `;
+        
+        upcomingReminders.forEach(reminder => {
+          const reminderElement = document.createElement("div");
+          reminderElement.className = "reminder-item";
+          
+          const categoryLabel = reminder.category ? 
+            `<span class="category-badge" style="background-color: #e2e2e2; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${reminder.category}</span>` 
+            : "";
+          
+          reminderElement.innerHTML = `
+            <div class="reminder-info">
+              <strong>${reminder.title}</strong>
+              ${categoryLabel}
+            </div>
+            <div class="date">${new Date(reminder.date).toLocaleDateString()}</div>
+          `;
+          notificationSection.appendChild(reminderElement);
+        });
+      } else {
+        notificationSection.innerHTML = `
+          <h3><i class="fas fa-bell"></i> Upcoming Reminders</h3>
+          <div class="no-reminders">No reminders due tomorrow</div>
+        `;
+      }
+    } else {
+      console.error("Failed to load reminders:", data.message);
+      notificationSection.innerHTML = `
+        <h3><i class="fas fa-bell"></i> Upcoming Reminders</h3>
+        <div class="no-reminders">Error loading reminders</div>
       `;
-      notificationSection.appendChild(reminderElement);
-    });
-  } else {
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching reminders:", error);
     notificationSection.innerHTML = `
       <h3><i class="fas fa-bell"></i> Upcoming Reminders</h3>
-      <div class="no-reminders">No reminders due tomorrow</div>
+      <div class="no-reminders">Error loading reminders</div>
     `;
-  }
+  });
 }
 
 // For backward compatibility or direct loading
