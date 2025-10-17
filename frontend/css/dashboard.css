@@ -115,6 +115,58 @@
   background-color: #a67c52;
 }
 
+/* Notification Section */
+.notification-section {
+  margin-bottom: 30px;
+}
+
+.upcoming-reminders {
+  background-color: #fff3cd; /* Light yellow background for notifications */
+  border: 1px solid #ffeaa7;  /* Border color */
+  border-radius: var(--radius);
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.upcoming-reminders h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #856404; /* Darker yellow text for header */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upcoming-reminders .reminder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #ffeaa7;
+}
+
+.upcoming-reminders .reminder-item:last-child {
+  border-bottom: none;
+}
+
+.upcoming-reminders .reminder-item .reminder-info {
+  flex: 1;
+}
+
+.upcoming-reminders .reminder-item .date {
+  font-weight: bold;
+  color: #856404;
+  margin-left: 10px;
+}
+
+.upcoming-reminders .no-reminders {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 10px 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
