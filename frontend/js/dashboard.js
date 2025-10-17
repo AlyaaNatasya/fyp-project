@@ -14,7 +14,7 @@ window.initDashboardPage = function() {
 
       switch (action) {
         case "summary":
-          window.location.href = "../pages/summary.html";
+          window.location.href = "../pages/uploadNote.html";
           break;
 
         case "quizzes":
