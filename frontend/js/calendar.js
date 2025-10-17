@@ -6,7 +6,7 @@
  */
 
 // ✅ Global variables for reminders and date handling
-let reminders = JSON.parse(localStorage.getItem("studybloom-reminders")) || [];
+let reminders = [];
 
 // ✅ Define editReminder globally so it can be called from anywhere
 function editReminder(reminder) {
@@ -88,30 +88,63 @@ function setupReminderModal() {
       return;
     }
 
-    const date = new Date(dateStr); // Convert to Date object
+    // Create date object ensuring it's in the correct date (not affected by timezone)
+    // The date input always returns in YYYY-MM-DD format
+    const dateParts = dateStr.split('-');
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+    const day = parseInt(dateParts[2]);
+    
+    // Create date object at the start of the day UTC to avoid timezone shifting
+    const date = new Date(Date.UTC(year, month, day));
 
-    const reminder = {
-      id: window.editingReminder
-        ? window.editingReminder.id
-        : Date.now().toString(),
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    const reminderData = {
       title,
       description,
       category,
       date: date.toISOString(),
     };
 
+    let apiUrl = "http://localhost:5000/api/reminders";
+    let method = "POST";
+
     if (window.editingReminder) {
-      reminders = reminders.map((r) => (r.id === reminder.id ? reminder : r));
-    } else {
-      reminders.push(reminder);
+      // Update existing reminder
+      apiUrl = `http://localhost:5000/api/reminders/${window.editingReminder.id}`;
+      method = "PUT";
     }
 
-    localStorage.setItem("studybloom-reminders", JSON.stringify(reminders));
-    loadReminders();
-    reminderModal.classList.remove("active");
-
-    // Clear globals
-    window.editingReminder = null;
+    fetch(apiUrl, {
+      method: method,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(reminderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log(method === "POST" ? "Reminder created" : "Reminder updated", "successfully");
+        loadReminders(); // Reload reminders after save
+        reminderModal.classList.remove("active");
+        // Clear globals
+        window.editingReminder = null;
+      } else {
+        console.error("Failed to save reminder:", data.message);
+        alert(data.message || "Failed to save reminder");
+      }
+    })
+    .catch(error => {
+      console.error("Error saving reminder:", error);
+      alert("Error saving reminder");
+    });
   });
 
   // Initialize openReminderModal
@@ -145,60 +178,114 @@ function formatDate(date) {
 
 // --- Reminder Logic ---
 function loadReminders() {
-  const reminderList = document.getElementById("reminder-list");
-  if (!reminderList) return;
+  // Fetch reminders from the API
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No authentication token found");
+    return;
+  }
 
-  reminderList.innerHTML = "";
+  fetch("http://localhost:5000/api/reminders", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      reminders = data.reminders || [];
+      const reminderList = document.getElementById("reminder-list");
+      if (!reminderList) return;
 
-  const sorted = reminders
-    .map((r) => ({ ...r, date: new Date(r.date) }))
-    .sort((a, b) => a.date - b.date);
+      reminderList.innerHTML = "";
 
-  sorted.forEach((reminder) => {
-    const card = document.createElement("div");
-    card.classList.add("reminder-card");
-    card.dataset.id = reminder.id;
+      const sorted = reminders
+        .map((r) => ({ ...r, date: new Date(r.date) }))
+        .sort((a, b) => a.date - b.date);
 
-    const categoryLabel = reminder.category
-      ? `<span class="category">${reminder.category}</span>`
-      : "";
+      sorted.forEach((reminder) => {
+        const card = document.createElement("div");
+        card.classList.add("reminder-card");
+        card.dataset.id = reminder.id;
 
-    card.innerHTML = `
-      <i class="fas fa-bell"></i>
-      <div class="reminder-info">
-        <strong>${reminder.title}</strong>
-        <small>${formatDate(new Date(reminder.date))}</small>
-        ${categoryLabel}
-      </div>
-      <div class="reminder-actions">
-        <button class="btn-icon edit-btn" title="Edit Reminder">
-          <i class="fas fa-pencil-alt"></i>
-        </button>
-        <button class="btn-icon delete-btn" title="Delete Reminder">
-          <i class="fas fa-trash-alt"></i>
-        </button>
-      </div>
-    `;
+        const categoryLabel = reminder.category
+          ? `<span class="category">${reminder.category}</span>`
+          : "";
 
-    // Edit reminder
-    card.querySelector(".edit-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      editReminder(reminder);
-    });
+        card.innerHTML = `
+          <i class="fas fa-bell"></i>
+          <div class="reminder-info">
+            <strong>${reminder.title}</strong>
+            <small>${formatDate(new Date(reminder.date))}</small>
+            ${categoryLabel}
+          </div>
+          <div class="reminder-actions">
+            <button class="btn-icon edit-btn" title="Edit Reminder">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn-icon delete-btn" title="Delete Reminder">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        `;
 
-    // Delete reminder
-    card.querySelector(".delete-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (confirm(`Are you sure you want to delete "${reminder.title}"?`)) {
-        reminders = reminders.filter((r) => r.id !== reminder.id);
-        localStorage.setItem("studybloom-reminders", JSON.stringify(reminders));
-        loadReminders();
-      }
-    });
+        // Edit reminder
+        card.querySelector(".edit-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          editReminder(reminder);
+        });
 
-    card.addEventListener("dblclick", () => editReminder(reminder));
-    reminderList.appendChild(card);
+        // Delete reminder
+        card.querySelector(".delete-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteReminder(reminder.id);
+        });
+
+        card.addEventListener("dblclick", () => editReminder(reminder));
+        reminderList.appendChild(card);
+      });
+    } else {
+      console.error("Failed to load reminders:", data.message);
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching reminders:", error);
   });
+}
+
+// Delete a reminder
+function deleteReminder(id) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No authentication token found");
+    return;
+  }
+
+  if (confirm("Are you sure you want to delete this reminder?")) {
+    fetch(`http://localhost:5000/api/reminders/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Reminder deleted successfully");
+        loadReminders(); // Reload reminders after deletion
+      } else {
+        console.error("Failed to delete reminder:", data.message);
+        alert(data.message || "Failed to delete reminder");
+      }
+    })
+    .catch(error => {
+      console.error("Error deleting reminder:", error);
+      alert("Error deleting reminder");
+    });
+  }
 }
 
 // --- Calendar Logic ---
