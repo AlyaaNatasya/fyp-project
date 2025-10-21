@@ -6,6 +6,17 @@
  */
 
 document.addEventListener("DOMContentLoaded", function () {
+  // ✅ Wait for .main-content to exist before running logic
+  const mainContentCheck = setInterval(() => {
+    const mainContent = document.querySelector(".main-content");
+    if (mainContent) {
+      clearInterval(mainContentCheck);
+      initCollectionPage(); // Now safe to run
+    }
+  }, 100);
+});
+
+function initCollectionPage() {
   const token = localStorage.getItem("token");
   const usernameSpan = document.getElementById("username");
 
@@ -39,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load and display saved notes
   loadCollection();
-});
+}
 
 function loadCollection() {
   const notesList = document.querySelector(".notes-list");
