@@ -7,7 +7,7 @@ const getReminders = async (req, res) => {
     const userId = req.user.id; // Extracted from JWT token by middleware
 
     const [reminders] = await pool.execute(
-      'SELECT id, title, description, category, date FROM reminders WHERE user_id = ? ORDER BY date ASC',
+      'SELECT id, title, description, category, DATE_FORMAT(date, \'%Y-%m-%d\') as date FROM reminders WHERE user_id = ? ORDER BY date ASC',
       [userId]
     );
 
@@ -38,18 +38,23 @@ const createReminder = async (req, res) => {
       });
     }
 
-    // Validate date format
-    const dateObj = new Date(date);
-    if (isNaN(dateObj.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid date format'
-      });
+    // Store the date as provided, ensuring it's in the correct format
+    let processedDate = date;
+    if (date && typeof date === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/.test(date)) {
+        // If it's in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format, use as is
+        processedDate = date.includes(' ') ? date : date + ' 00:00:00';
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date format. Expected YYYY-MM-DD or YYYY-MM-DD HH:MM:SS'
+        });
+      }
     }
 
     const [result] = await pool.execute(
       'INSERT INTO reminders (user_id, title, description, category, date) VALUES (?, ?, ?, ?, ?)',
-      [userId, title, description || '', category || '', date]
+      [userId, title, description || '', category || '', processedDate]
     );
 
     res.status(201).json({
@@ -86,10 +91,24 @@ const updateReminder = async (req, res) => {
       });
     }
 
+    // Process date ensuring it's in the correct format
+    let processedDate = date;
+    if (date && typeof date === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/.test(date)) {
+        // If it's in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format, use as is
+        processedDate = date.includes(' ') ? date : date + ' 00:00:00';
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date format. Expected YYYY-MM-DD or YYYY-MM-DD HH:MM:SS'
+        });
+      }
+    }
+
     // Update the reminder
     const [result] = await pool.execute(
       'UPDATE reminders SET title = ?, description = ?, category = ?, date = ? WHERE id = ? AND user_id = ?',
-      [title, description || '', category || '', date, id, userId]
+      [title, description || '', category || '', processedDate, id, userId]
     );
 
     if (result.affectedRows === 0) {
