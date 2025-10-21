@@ -179,6 +179,18 @@ function initReadMoreButton() {
   }
 }
 
+// Prevent zoom on mobile devices for form inputs
+function preventMobileZoom() {
+  const inputs = document.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      if (window.innerWidth <= 768) {
+        document.body.style.zoom = '1';
+      }
+    });
+  });
+}
+
 // 🔥 ONE DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {
   const currentPage = window.location.pathname.split("/").pop();
@@ -188,4 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     loadSharedLayout(); // This will call initPageAfterLoad() after content is loaded
   }
+  
+  // Apply mobile optimizations
+  preventMobileZoom();
 });

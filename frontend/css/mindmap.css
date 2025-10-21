@@ -85,3 +85,44 @@
   overflow: hidden;
   position: relative;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .mindmap-canvas {
+    height: calc(100vh - 280px);
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .mindmap-canvas {
+    height: calc(100vh - 250px);
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.5rem;
+  }
+}

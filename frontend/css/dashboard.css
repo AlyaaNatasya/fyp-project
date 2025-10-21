@@ -168,17 +168,69 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .card-grid {
+    grid-template-columns: 1fr; /* Single column on medium screens */
+  }
+  
+  .main-content {
+    padding: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
   .header h1 {
     font-size: 1.5rem;
   }
 
   .welcome-section h2 {
     font-size: 1.6rem;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 10px 0;
+  }
+  
+  .welcome-section {
+    margin-bottom: 30px;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.4rem;
+  }
+  
+  .card {
+    padding: 20px 15px;
+  }
+  
+  .card h3 {
+    font-size: 1.3rem;
+  }
+  
+  .card-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
 }

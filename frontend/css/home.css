@@ -224,29 +224,109 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .main-content {
+    gap: 30px;
+  }
+  
+  .app-description h1 {
+    font-size: 2.2rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 0;
+  }
+  
+  .nav-links {
+    margin-top: 10px;
+  }
+  
+  .nav-links li {
+    margin: 0 10px;
+  }
+
   .main-content {
     flex-direction: column;
+    margin-top: 30px;
+    gap: 25px;
   }
 
   .app-description {
     padding-right: 0;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
   }
 
   .nav-logo {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    justify-content: center;
   }
 
   .nav-logo i {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
   }
 
   .app-description h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+  
+  .app-description p {
+    font-size: 1rem;
   }
 
   .auth-container {
     max-width: 100%;
+    padding: 20px;
+  }
+  
+  .auth-tabs {
+    margin-bottom: 20px;
+  }
+  
+  .read-more-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .nav-logo {
+    font-size: 1.6rem;
+  }
+  
+  .nav-logo i {
+    font-size: 2rem;
+  }
+  
+  .app-description h1 {
+    font-size: 1.6rem;
+  }
+  
+  .app-description p {
+    font-size: 0.95rem;
+  }
+  
+  .auth-container {
+    padding: 15px;
+  }
+  
+  .form-group input {
+    padding: 10px;
+  }
+  
+  .auth-btn {
+    padding: 10px;
+  }
+  
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-links li {
+    margin: 5px;
   }
 }
