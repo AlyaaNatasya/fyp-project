@@ -160,18 +160,90 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .summary-container {
+    gap: 30px;
+  }
+  
+  .notes-section,
+  .summary-section {
+    height: 500px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .summary-container {
     grid-template-columns: 1fr;
+    gap: 25px;
   }
 
   .notes-section,
   .summary-section {
-    height: auto;
+    height: 400px;
+  }
+  
+  .notes-section h3,
+  .summary-section h3 {
+    font-size: 1.3rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .save-btn,
+  .mindmap-btn {
+    padding: 12px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .notes-section,
+  .summary-section {
+    height: 350px;
+    padding: 20px 15px;
+  }
+  
+  .summary-box {
+    height: 300px;
+    padding: 15px;
+  }
+  
+  .notes-box {
+    font-size: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .save-btn,
+  .mindmap-btn {
+    width: 100%;
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

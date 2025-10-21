@@ -9,6 +9,20 @@
   font-family: "Libertinus Math", sans-serif;
 }
 
+/* Ensure proper viewport scaling on mobile devices */
+body {
+  background-color: var(--primary-bg);
+  color: var(--text-dark);
+  /* Prevent horizontal scrolling */
+  overflow-x: hidden;
+}
+
+/* Better selection colors for mobile */
+::selection {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
 :root {
   --primary-bg: #fee3c3;
   --primary-color: #c1946e;
@@ -18,11 +32,9 @@
   --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   --radius: 8px;
   --transition: all 0.3s ease;
-}
-
-body {
-  background-color: var(--primary-bg);
-  color: var(--text-dark);
+  /* Mobile-friendly sizes */
+  --mobile-padding: 15px;
+  --mobile-gap: 15px;
 }
 
 .container {
@@ -161,9 +173,82 @@ body {
   }
 }
 
+/* Mobile-friendly base styles */
+button, input, select, textarea {
+  font-size: 16px; /* Prevents zoom on mobile devices when form elements are focused */
+}
+
 /* Responsive Base */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
+  
+  /* Adjust sidebar width on medium screens */
+  .sidebar {
+    width: 200px;
+  }
+  
+  .sidebar.collapsed {
+    transform: translateX(-160px);
+    width: 40px;
+  }
+  
+  .sidebar.collapsed ~ .main-content {
+    margin-left: 40px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 15px;
   }
+
+  /* Mobile menu styles */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 250px;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .sidebar.inactive {
+    transform: translateX(-100%);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  /* Mobile menu toggle button */
+  .menu-toggle {
+    display: block;
+    z-index: 1001;
+  }
+  
+  /* Ensure content doesn't overlap with fixed sidebar */
+  body.sidebar-active {
+    overflow: hidden;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .main-content {
+    padding: 10px;
+  }
+  
+  /* Adjust text sizes for small screens */
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.4rem; }
+  h4 { font-size: 1.2rem; }
 }

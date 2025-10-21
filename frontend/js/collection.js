@@ -78,14 +78,66 @@ function loadCollection() {
     const noteCard = document.createElement("div");
     noteCard.classList.add("collection-note");
     noteCard.innerHTML = `
-      <h4>${note.title}</h4>
+      <div class="note-header">
+        <h4>${note.title}</h4>
+        <button class="delete-note-btn" title="Delete note">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
       <small>${formatDate(new Date(note.date))}</small>
       <p>${note.content.substring(0, 150)}${
       note.content.length > 150 ? "..." : ""
     }</p>
     `;
+
+    // Add event listener to the delete button
+    const deleteBtn = noteCard.querySelector('.delete-note-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent triggering any parent click events
+      deleteNote(note.id || note.title, noteCard);
+    });
+
     notesList.appendChild(noteCard);
   });
+}
+
+function deleteNote(noteId, noteCard) {
+  if (!confirm("Are you sure you want to delete this note?")) {
+    return; // Exit if user cancels
+  }
+
+  // Get the current collection from localStorage
+  let collection = JSON.parse(localStorage.getItem("studybloom-collection")) || [];
+
+  // Filter out the note to be deleted
+  // If the note has an id, use that for comparison, otherwise use title
+  collection = collection.filter(note => {
+    if (note.id) {
+      return note.id !== noteId;
+    } else {
+      return note.title !== noteId;
+    }
+  });
+
+  // Save the updated collection back to localStorage
+  localStorage.setItem("studybloom-collection", JSON.stringify(collection));
+
+  // Remove the note card from the DOM with animation
+  noteCard.style.opacity = '0';
+  noteCard.style.transform = 'translateX(-20px)';
+  noteCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+  setTimeout(() => {
+    noteCard.remove();
+    
+    // Check if there are any notes left, show empty message if not
+    const notesList = document.querySelector(".notes-list");
+    if (notesList && collection.length === 0) {
+      notesList.innerHTML = `
+        <p class="empty-message">No notes saved yet. Add your first note by uploading in Summary or Quizzes.</p>
+      `;
+    }
+  }, 300);
 }
 
 function formatDate(date) {

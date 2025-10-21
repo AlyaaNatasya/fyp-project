@@ -1,4 +1,4 @@
-/* frontend/css/summary.css */
+/* frontend/css/uploadNote.css */
 
 /* Main Content - White Background */
 .main-content {
@@ -138,22 +138,76 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .upload-instruction {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .summary-container {
-    padding: 0 20px;
+    padding: 0 15px;
   }
 
   .upload-section {
     gap: 15px;
+    padding: 0 10px;
   }
 
   .upload-instruction {
     font-size: 1rem;
-    padding: 0 20px;
+    padding: 0 10px;
+    margin-bottom: 20px;
+  }
+  
+  .choose-file-btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+  
+  .generate-btn {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .upload-section {
+    width: 100%;
+    padding: 0 5px;
+  }
+  
+  .upload-instruction {
+    font-size: 0.95rem;
+    padding: 0 5px;
+    text-align: center;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
   }
 }

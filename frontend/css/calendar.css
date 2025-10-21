@@ -333,18 +333,96 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .calendar-container {
+    gap: 30px;
+  }
+  
+  .calendar-section h3,
+  .reminders-section h3 {
+    font-size: 1.7rem;
+  }
+  
+  .calendar-header h3 {
+    font-size: 1.4rem;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .calendar-container {
     grid-template-columns: 1fr;
+    gap: 25px;
   }
 
   .calendar-section h3,
   .reminders-section h3 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+  }
+  
+  .calendar-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-section h3,
+  .reminders-section h3 {
+    font-size: 1.4rem;
+  }
+  
+  #calendar .day {
+    padding: 8px 4px;
+    font-size: 0.9rem;
+  }
+  
+  .reminder-card {
+    padding: 10px 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .reminder-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
   }
 }

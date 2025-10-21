@@ -177,20 +177,32 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .generate-options {
+    gap: 30px;
+  }
+  
+  .option-card {
+    width: 170px;
+    padding: 18px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .quizzes-container {
-    padding: 0 20px;
+    padding: 0 15px;
   }
 
   .search-bar {
     flex-direction: column;
     gap: 10px;
     padding: 15px;
+    max-width: 100%;
   }
 
   .search-btn {
@@ -199,6 +211,56 @@
 
   .generate-options {
     flex-direction: column;
-    gap: 30px;
+    gap: 25px;
+    margin-top: 30px;
+  }
+  
+  .option-card {
+    width: 100%;
+    max-width: 300px;
+    padding: 20px;
+  }
+  
+  .instruction {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .menu-toggle {
+    align-self: flex-start;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .option-card {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  .option-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .generate-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .welcome-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
   }
 }

@@ -93,13 +93,33 @@
   margin: 0;
 }
 
-/* Notes List - Now just a placeholder area without a box */
+/* Notes List - Grid layout for displaying notes */
 .notes-list {
   min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Removed: background-color, padding, border-radius, box-shadow */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+  /* Removed: background-color, border-radius, box-shadow */
+}
+
+/* Responsive grid for smaller screens */
+@media (max-width: 1200px) {
+  .notes-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .notes-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .notes-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Empty Message - Bigger and more visible */
@@ -119,11 +139,12 @@
   background-color: white;
   border-radius: var(--radius);
   padding: 20px;
-  margin: 15px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: left;
   width: 100%;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  height: auto;
 }
 
 .collection-note h4 {
@@ -137,6 +158,32 @@
   font-size: 0.9rem;
 }
 
+/* Note Header to contain title and delete button */
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+/* Delete Button */
+.delete-note-btn {
+  background: none;
+  border: none;
+  color: #ff4757;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 5px;
+  margin-left: 10px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.delete-note-btn:hover {
+  background-color: #ffece6;
+  color: #ff2e43;
+}
+
 .collection-note p {
   margin: 10px 0 0 0;
   color: var(--text-dark);
@@ -144,23 +191,63 @@
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+  .notes-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .collection-container {
-    padding: 0 20px;
+    padding: 0 15px;
   }
 
   .collection-header h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     padding: 8px 15px;
   }
 
   .empty-message {
-    font-size: 1.3rem; /* Slightly smaller on mobile */
-    padding: 0 20px;
+    font-size: 1.2rem; /* Slightly smaller on mobile */
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .notes-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .collection-header h3 {
+    font-size: 1.3rem;
+    padding: 6px 12px;
+  }
+  
+  .empty-message {
+    font-size: 1.1rem;
+    padding: 0 10px;
+  }
+  
+  .collection-note {
+    padding: 15px;
+  }
+  
+  .note-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .delete-note-btn {
+    align-self: flex-end;
+    margin-left: 0;
   }
 }
