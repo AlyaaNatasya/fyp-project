@@ -36,10 +36,33 @@ function editReminder(reminder) {
     customInput.value = reminder.category;
   }
 
-  // Set date
-  const selectedDate = new Date(reminder.date);
-  const dateString = selectedDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-  reminderDateInput.value = dateString;
+  // Set date - extract only the date part to avoid timezone issues
+  // Handle various possible date formats that might come from the backend
+  let datePart = reminder.date;
+  
+  // If date contains time part, extract just the date part
+  if (typeof reminder.date === 'string' && reminder.date.includes(' ')) {
+    datePart = reminder.date.split(' ')[0];
+  } else if (typeof reminder.date === 'string' && reminder.date.includes('T')) {
+    // Handle ISO format (YYYY-MM-DDTHH:MM:SS)
+    datePart = reminder.date.split('T')[0];
+  }
+  
+  // Validate that we have a proper YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    reminderDateInput.value = datePart;
+  } else {
+    console.error('Invalid date format received:', reminder.date);
+    // Fallback: try to create a valid date string
+    const dateObj = new Date(reminder.date);
+    if (!isNaN(dateObj.getTime())) {
+      // Format as YYYY-MM-DD
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      reminderDateInput.value = `${year}-${month}-${day}`;
+    }
+  }
 
   // Show modal
   reminderModal.classList.add("active");
@@ -88,27 +111,20 @@ function setupReminderModal() {
       return;
     }
 
-    // Create date object ensuring it's in the correct date (not affected by timezone)
-    // The date input always returns in YYYY-MM-DD format
-    const dateParts = dateStr.split('-');
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
-    const day = parseInt(dateParts[2]);
-    
-    // Create date object at the start of the day UTC to avoid timezone shifting
-    const date = new Date(Date.UTC(year, month, day));
-
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No authentication token found");
       return;
     }
 
+    // Send the date string as-is since we want to preserve the local date
+    const dateForBackend = dateStr + ' 00:00:00';
+
     const reminderData = {
       title,
       description,
       category,
-      date: date.toISOString(),
+      date: dateForBackend, // Send as ISO string to backend
     };
 
     let apiUrl = "http://localhost:5000/api/reminders";
@@ -158,8 +174,11 @@ function setupReminderModal() {
     reminderForm.reset();
     window.editingReminder = null;
 
-    // Format date for input
-    const dateString = date.toISOString().split("T")[0];
+    // Format date for input without timezone conversion
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
     reminderDateInput.value = dateString;
 
     reminderModal.classList.add("active");
@@ -174,6 +193,44 @@ function formatDate(date) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+// --- Utility: Format Date String ---
+function formatDateFromString(dateString) {
+  // Parse date string and format it manually to avoid timezone issues
+  // Handle various possible date formats that might come from the backend
+  let datePart = dateString;
+  
+  // Extract only the date part in case there's any time component
+  if (typeof dateString === 'string' && dateString.includes(' ')) {
+    datePart = dateString.split(' ')[0];
+  } else if (typeof dateString === 'string' && dateString.includes('T')) {
+    // Handle ISO format (YYYY-MM-DDTHH:MM:SS)
+    datePart = dateString.split('T')[0];
+  }
+  
+  // Validate that we have a proper YYYY-MM-DD format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    console.error('Invalid date format for display:', dateString);
+    return 'Invalid Date';
+  }
+  
+  const [yearStr, monthStr, dayStr] = datePart.split('-');
+  const year = parseInt(yearStr);
+  const month = parseInt(monthStr);
+  const day = parseInt(dayStr);
+  
+  // Define month and weekday names for manual formatting
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  // Create date object using local timezone to preserve the calendar date
+  // Use 12 noon to avoid potential DST boundary issues
+  const tempDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T12:00:00`);
+  const weekdayIndex = tempDate.getDay();
+  
+  return `${weekdays[weekdayIndex]}, ${months[month - 1]} ${day}, ${year}`;
 }
 
 // --- Reminder Logic ---
@@ -201,9 +258,20 @@ function loadReminders() {
 
       reminderList.innerHTML = "";
 
+      // Sort reminders by date string (YYYY-MM-DD format sorts correctly alphabetically)
       const sorted = reminders
-        .map((r) => ({ ...r, date: new Date(r.date) }))
-        .sort((a, b) => a.date - b.date);
+        .map((r) => {
+          // Extract only the date part (YYYY-MM-DD) in case there's time info
+          const datePart = r.date.split(' ')[0];
+          // Create date object for display purposes only
+          const [yearStr, monthStr, dayStr] = datePart.split('-');
+          const year = parseInt(yearStr);
+          const month = parseInt(monthStr) - 1; // Month is 0-indexed
+          const day = parseInt(dayStr);
+          const dateObj = new Date(year, month, day, 12, 0, 0); // Use noon to avoid DST issues
+          return { ...r, dateObj, dateStr: datePart };
+        })
+        .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 
       sorted.forEach((reminder) => {
         const card = document.createElement("div");
@@ -218,7 +286,7 @@ function loadReminders() {
           <i class="fas fa-bell"></i>
           <div class="reminder-info">
             <strong>${reminder.title}</strong>
-            <small>${formatDate(new Date(reminder.date))}</small>
+            <small>${formatDateFromString(reminder.date)}</small>
             ${categoryLabel}
           </div>
           <div class="reminder-actions">
