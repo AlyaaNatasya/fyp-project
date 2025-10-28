@@ -14,6 +14,32 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <!-- PDF.js viewer styles -->
+    <style>
+      .pdf-viewer-container {
+        width: 100%;
+        overflow: auto;
+      }
+      #pdf-viewer-canvas {
+        width: 100%;
+        max-width: 800px;
+        display: block;
+        margin: 0 auto;
+      }
+      #pdf-canvas-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .pdf-page-canvas {
+        width: 100% !important;
+        max-width: 800px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        margin: 5px 0;
+      }
+    </style>
   </head>
   <body>
     <div class="dashboard-container">
@@ -43,6 +69,10 @@
             <div id="actual-notes" class="notes-box">
               <!-- Your uploaded file content will appear here -->
             </div>
+            <!-- PDF viewer container that will be shown for PDF files -->
+            <div id="pdf-viewer-container" class="pdf-viewer-container" style="display: none;">
+              <div id="pdf-canvas-container"></div>
+            </div>
           </div>
 
           <div class="summary-section">
@@ -66,7 +96,8 @@
 
     <!-- Shared JS -->
     <script src="../js/main.js"></script>
-    <!-- Page-Specific JS -->
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="../js/summary.js"></script>
   </body>
 </html>

@@ -31,3 +31,23 @@ CREATE TABLE IF NOT EXISTS reminders (
 -- Create indexes for better performance
 CREATE INDEX idx_user_id ON reminders(user_id);
 CREATE INDEX idx_date ON reminders(date);
+
+-- Create summaries table
+CREATE TABLE IF NOT EXISTS summaries (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    original_filename VARCHAR(255) NOT NULL,
+    original_content_preview TEXT,
+    summary_text TEXT NOT NULL,
+    file_path VARCHAR(500),
+    status ENUM('processing', 'completed', 'failed') NOT NULL DEFAULT 'processing',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create indexes for the summaries table
+CREATE INDEX idx_user_id_summaries ON summaries(user_id);
+CREATE INDEX idx_created_at ON summaries(created_at);
+CREATE INDEX idx_status ON summaries(status);

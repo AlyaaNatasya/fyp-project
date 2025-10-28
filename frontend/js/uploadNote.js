@@ -45,6 +45,7 @@ function initUploadNotePage() {
   const fileInput = document.getElementById("file-input");
   const chooseFileBtn = document.querySelector(".choose-file-btn");
   const generateBtn = document.querySelector(".generate-btn");
+  const backendUrl = "http://localhost:5001"; // Node.js server URL
 
   // Safety check
   if (!fileInput || !chooseFileBtn || !generateBtn) {
@@ -56,7 +57,7 @@ function initUploadNotePage() {
 
   console.log("✅ Upload elements found — initializing event listeners...");
 
-  chooseFileBtn.addEventListener("click", () => {
+  chooseFileBtn.addEventListener("click", (e) => {
     e.preventDefault();
     fileInput.click();
   });
@@ -70,7 +71,7 @@ function initUploadNotePage() {
     }
   });
 
-  generateBtn.addEventListener("click", () => {
+  generateBtn.addEventListener("click", async () => {
     if (!fileInput.files.length) {
       alert("Please select a file first.");
       return;
@@ -78,27 +79,127 @@ function initUploadNotePage() {
 
     const selectedFile = fileInput.files[0];
 
-    // 👇 Store file info in localStorage (temporary, for demo)
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      // Store file name and simulated summary
-      const fakeSummary = `
-      Key Points from ${selectedFile.name}:
-      • This is a simulated AI-generated summary.
-      • In the real app, this would use your AI model to extract main ideas.
-      • It would highlight definitions, key terms, and concepts.
-      • The summary would be concise and study-friendly.
-    `;
+    // Show loading state
+    const originalText = generateBtn.textContent;
+    generateBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    generateBtn.disabled = true;
 
-      // Save to localStorage so summary.html can read it
-      localStorage.setItem("uploadedFileName", selectedFile.name);
-      localStorage.setItem("generatedSummary", fakeSummary);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
-      // ✅ Redirect to summary page
-      window.location.href = "../pages/summary.html";
-    };
+    try {
+      console.log("Making request to:", `${backendUrl}/api/ai/summarize`);
+      console.log("Token exists:", !!localStorage.getItem("token"));
+      console.log(
+        "Token:",
+        localStorage.getItem("token")?.substring(0, 20) + "..."
+      );
 
-    reader.readAsText(selectedFile); // 👈 Use readAsText for easier display (unless binary needed)
+      // Create an AbortController with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 300 second timeout (5 minutes) to accommodate AI processing
+
+      const response = await fetch(`${backendUrl}/api/ai/summarize`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // Note: Don't set Content-Type header when using FormData
+          // The browser will set it automatically with the correct boundary
+        },
+        body: formData,
+        signal: controller.signal, // Add the abort signal
+      });
+
+      clearTimeout(timeoutId); // Clear timeout if request completes
+
+      console.log("Response received - Status:", response.status);
+      console.log("Response headers:", [...response.headers.entries()]);
+
+      // Check if the response is ok before parsing JSON
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          // Attempt to get error details from response
+          const errorText = await response.text();
+          console.error("Error response text:", errorText);
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+          } catch (parseError) {
+            // If response is not JSON, use the text directly
+            console.error(
+              "Could not parse error response as JSON:",
+              parseError
+            );
+            errorMessage = errorText || errorMessage;
+          }
+        } catch (readError) {
+          console.error("Could not read error response:", readError);
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Check content type before parsing
+      const contentType = response.headers.get("content-type");
+      console.log("Response content type:", contentType);
+      if (!contentType || !contentType.includes("application/json")) {
+        const responseText = await response.text();
+        console.error(
+          "Response is not JSON. Content-Type:",
+          contentType,
+          "Response text:",
+          responseText
+        );
+        throw new Error(
+          "Response is not in JSON format: " + responseText.substring(0, 200)
+        );
+      }
+
+      // Get the JSON response, even for errors
+      const data = await response.json();
+      console.log("Response received:", data);
+
+      if (!response.ok) {
+        // Handle errors from the *initial* request (e.g., 400, 500)
+        throw new Error(
+          data.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      // --- SUCCESS (Expect 202 Accepted) ---
+      if (response.status === 202 && data.summaryId) {
+        console.log("File accepted for processing. ID:", data.summaryId);
+
+        // Store filename to display on summary page while loading
+        localStorage.setItem(
+          "uploadedFileName",
+          data.fileName || "Unknown File"
+        );
+
+        // Redirect to summary page, which will now handle polling
+        window.location.href = `../pages/summary.html?summaryId=${data.summaryId}`;
+      } else {
+        // Handle unexpected success response
+        console.error("Invalid response format:", data);
+        throw new Error(
+          "Invalid response format from server: missing summaryId"
+        );
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      console.error("Error name:", error.name);
+
+      if (error.name === "AbortError") {
+        alert("Request timeout: The server did not accept the file in time.");
+      } else {
+        alert(`Error: ${error.message}`);
+      }
+    } finally {
+      // Restore button state
+      generateBtn.textContent = originalText;
+      generateBtn.disabled = false;
+    }
   });
 }
 

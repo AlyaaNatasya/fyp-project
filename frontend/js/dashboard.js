@@ -51,7 +51,7 @@ function showUpcomingReminders() {
     return;
   }
 
-  fetch("http://localhost:5000/api/reminders", {
+  fetch("http://localhost:5001/api/reminders", {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
