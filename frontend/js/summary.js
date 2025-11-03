@@ -253,31 +253,68 @@ function initSummaryPage() {
   }
 
   // Save to Collection → Save & Go to Collection Page
-  saveBtn?.addEventListener("click", () => {
-    // Get the current summary text
-    const summaryText = summaryOutput.innerText.trim();
+  saveBtn?.addEventListener("click", async () => {
+    try {
+      // Get the current summary ID from URL parameters or localStorage
+      const summaryId = urlParams.get('summaryId') || localStorage.getItem("summaryId");
+      
+      if (!summaryId) {
+        alert("No summary found to save. Please generate a summary first.");
+        return;
+      }
 
-    // Load existing collection from localStorage
-    let collection =
-      JSON.parse(localStorage.getItem("studybloom-collection")) || [];
+      // Check if user has any collections, if not, ask them to create one
+      const response = await fetch("http://localhost:5001/api/collections", {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch collections: ${response.status}`);
+      }
+      
+      const collections = await response.json();
+      
+      if (collections.length === 0) {
+        if (confirm("You don't have any collections yet. Would you like to create one first?")) {
+          // Redirect to collection page where they can create a collection
+          window.location.href = "../pages/collection.html";
+          return;
+        } else {
+          return;
+        }
+      }
 
-    // Create new note object
-    const newNote = {
-      id: Date.now().toString(),
-      title: "Web Development Summary",
-      content: summaryText,
-      date: new Date().toISOString(),
-    };
+      // For now, let's use the first collection as default
+      // You can enhance this later to show a modal to select a collection
+      const defaultCollection = collections[0];
+      
+      // Call the API to save the summary to the collection
+      const saveResponse = await fetch("http://localhost:5001/api/ai/summaries/" + summaryId + "/save-to-collection", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          summaryId: summaryId,
+          collectionId: defaultCollection.id
+        })
+      });
 
-    // Add to collection
-    collection.push(newNote);
+      if (!saveResponse.ok) {
+        const errorData = await saveResponse.json();
+        throw new Error(errorData.message || 'Failed to save to collection');
+      }
 
-    // Save back to localStorage
-    localStorage.setItem("studybloom-collection", JSON.stringify(collection));
-
-    // Show confirmation and redirect
-    alert("Summary saved to your collection!");
-    window.location.href = "../pages/collection.html"; // Redirect to collection page
+      // Show confirmation and redirect
+      alert("Summary saved to your collection!");
+      window.location.href = "../pages/collection.html"; // Redirect to collection page
+    } catch (error) {
+      console.error('Error saving to collection:', error);
+      alert("Error saving to collection: " + error.message);
+    }
   });
 
   // Generate Mind Map → Go to Mind Map Page

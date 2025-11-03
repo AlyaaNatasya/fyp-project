@@ -51,3 +51,32 @@ CREATE TABLE IF NOT EXISTS summaries (
 CREATE INDEX idx_user_id_summaries ON summaries(user_id);
 CREATE INDEX idx_created_at ON summaries(created_at);
 CREATE INDEX idx_status ON summaries(status);
+
+-- Create collections table
+CREATE TABLE IF NOT EXISTS collections (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create collection_items table to link summaries to collections
+CREATE TABLE IF NOT EXISTS collection_items (
+    id INT NOT NULL AUTO_INCREMENT,
+    collection_id INT NOT NULL,
+    summary_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+    FOREIGN KEY (summary_id) REFERENCES summaries(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_collection_summary (collection_id, summary_id)
+);
+
+-- Create indexes for collections and collection_items tables
+CREATE INDEX idx_user_id_collections ON collections(user_id);
+CREATE INDEX idx_collection_id ON collection_items(collection_id);
+CREATE INDEX idx_summary_id ON collection_items(summary_id);

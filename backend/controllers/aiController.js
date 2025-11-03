@@ -405,10 +405,69 @@ const getOriginalFile = async (req, res) => {
   }
 };
 
+// Save a summary to a collection
+const saveSummaryToCollection = async (req, res) => {
+  try {
+    const { summaryId, collectionId } = req.body;
+    const userId = req.user.id;
+
+    if (!summaryId || !collectionId) {
+      return res.status(400).json({
+        message: "Summary ID and Collection ID are required",
+      });
+    }
+
+    const connection = await pool.getConnection();
+    
+    // Verify that both the collection and summary belong to the user
+    const [collectionCheck] = await connection.execute(
+      "SELECT id FROM collections WHERE id = ? AND user_id = ?",
+      [collectionId, userId]
+    );
+
+    if (collectionCheck.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        message: "Collection not found or does not belong to user",
+      });
+    }
+
+    const [summaryCheck] = await connection.execute(
+      "SELECT id FROM summaries WHERE id = ? AND user_id = ?",
+      [summaryId, userId]
+    );
+
+    if (summaryCheck.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        message: "Summary not found or does not belong to user",
+      });
+    }
+
+    // Add the summary to the collection
+    await connection.execute(
+      "INSERT IGNORE INTO collection_items (collection_id, summary_id) VALUES (?, ?)",
+      [collectionId, summaryId]
+    );
+    
+    connection.release();
+
+    res.status(200).json({
+      message: "Summary saved to collection successfully",
+    });
+  } catch (error) {
+    console.error("Error saving summary to collection:", error);
+    res.status(500).json({
+      message: error.message || "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   generateSummaryFromUpload,
   getSummaryById,
   getUserSummaries,
   getOriginalFile,
+  saveSummaryToCollection,
   upload, // Export multer instance for use in routes
 };
