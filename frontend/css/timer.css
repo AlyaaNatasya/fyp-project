@@ -110,6 +110,14 @@
   text-align: center;
 }
 
+.break {
+  background-color: #4CAF50; /* Green color for break time */
+}
+
+.break:hover {
+  background-color: #45a049;
+}
+
 .mode-card i {
   font-size: 3rem;
   margin-bottom: 10px;

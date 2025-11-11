@@ -82,6 +82,8 @@ function initTimerPage() {
         initialSeconds = 5 * 60; // 5 minutes
       } else if (mode === "pomodoro") {
         initialSeconds = 25 * 60; // 25 minutes
+      } else if (mode === "break") {
+        initialSeconds = 5 * 60; // 5 minutes break
       }
 
       totalSeconds = initialSeconds; // ✅ Set current time to initial
