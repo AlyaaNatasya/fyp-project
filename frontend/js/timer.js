@@ -63,6 +63,7 @@ function initTimerPage() {
   let totalSeconds = 0;
   let initialSeconds = 0; // ✅ Store initial time
   let isRunning = false;
+  let currentPomodoroPhase = "study"; // Track current phase for Pomodoro: "study" or "break"
 
   // --- Timer Mode Selection ---
   document.querySelectorAll(".mode-card").forEach((card) => {
@@ -81,9 +82,12 @@ function initTimerPage() {
       if (mode === "speed") {
         initialSeconds = 5 * 60; // 5 minutes
       } else if (mode === "pomodoro") {
-        initialSeconds = 25 * 60; // 25 minutes
-      } else if (mode === "break") {
-        initialSeconds = 5 * 60; // 5 minutes break
+        // For Pomodoro mode, start with study time (25 minutes)
+        initialSeconds = 25 * 60; // 25 minutes study time
+        currentPomodoroPhase = "study"; // Track the current phase
+        timerMode.textContent = "Pomodoro Study Mode";
+        timerMode.classList.remove("break");
+        timerMode.classList.add("study"); // Add study class for styling
       }
 
       totalSeconds = initialSeconds; // ✅ Set current time to initial
@@ -107,6 +111,8 @@ function initTimerPage() {
     timerScreen.style.display = "none";
     modeSelection.style.display = "block";
     resetTimer();
+    // Reset the Pomodoro phase when going back to mode selection
+    currentPomodoroPhase = "study";
   });
 
   // --- Timer Functions ---
@@ -131,8 +137,31 @@ function initTimerPage() {
         totalSeconds--;
         updateTimerDisplay();
       } else {
+        // Timer finished, handle Pomodoro cycle
         pauseTimer();
-        alert("Time's up! Great job!");
+        
+        if (currentPomodoroPhase === "study") {
+          // Study time is over, switch to break
+          currentPomodoroPhase = "break";
+          timerMode.textContent = "Pomodoro Break Mode";
+          timerMode.classList.remove("study");
+          timerMode.classList.add("break"); // Add break class for styling
+          initialSeconds = 5 * 60; // 5 minutes break
+          totalSeconds = initialSeconds;
+          alert("Study time is over! Now take a 5-minute break to refresh your mind.");
+        } else if (currentPomodoroPhase === "break") {
+          // Break time is over, switch back to study
+          currentPomodoroPhase = "study";
+          timerMode.textContent = "Pomodoro Study Mode";
+          timerMode.classList.remove("break");
+          timerMode.classList.add("study"); // Add study class for styling
+          initialSeconds = 25 * 60; // 25 minutes study time
+          totalSeconds = initialSeconds;
+          alert("Break time is over! Let's get back to studying.");
+        }
+        
+        updateTimerDisplay();
+        startTimer(); // Automatically start the next phase
       }
     }, 1000);
 
@@ -156,6 +185,17 @@ function initTimerPage() {
 
     // ✅ Reset time back to original value
     totalSeconds = initialSeconds;
+    
+    // If in Pomodoro mode, reset the phase to study
+    if (timerMode.textContent.includes("Pomodoro")) {
+      currentPomodoroPhase = "study";
+      timerMode.textContent = "Pomodoro Study Mode";
+      timerMode.classList.remove("break");
+      timerMode.classList.add("study"); // Add study class for styling
+      initialSeconds = 25 * 60; // Reset to study time
+      totalSeconds = initialSeconds;
+    }
+    
     updateTimerDisplay();
   }
 }

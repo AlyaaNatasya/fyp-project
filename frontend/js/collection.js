@@ -50,90 +50,9 @@ function initCollectionPage() {
 
   // Load and display saved notes
   loadCollection();
-  
-  // Add event listener for create collection button
-  const createCollectionBtn = document.getElementById('createCollectionBtn');
-  if (createCollectionBtn) {
-    createCollectionBtn.addEventListener('click', showCreateCollectionModal);
-  }
 }
 
-function showCreateCollectionModal() {
-  // Create a modal for creating a new collection
-  const modal = document.createElement('div');
-  modal.classList.add('modal');
-  modal.innerHTML = `
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h3>Create New Collection</h3>
-      <form id="createCollectionForm">
-        <div class="form-group">
-          <label for="collectionName">Collection Name</label>
-          <input type="text" id="collectionName" placeholder="Enter collection name" required>
-        </div>
-        <div class="form-group">
-          <label for="collectionDescription">Description (Optional)</label>
-          <textarea id="collectionDescription" placeholder="Enter collection description"></textarea>
-        </div>
-        <button type="submit" class="btn-primary">Create Collection</button>
-      </form>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  // Add event listeners
-  const closeModal = modal.querySelector('.close-modal');
-  closeModal.addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
-  
-  const form = modal.querySelector('#createCollectionForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const name = modal.querySelector('#collectionName').value.trim();
-    const description = modal.querySelector('#collectionDescription').value.trim();
-    
-    if (!name) {
-      alert('Please enter a collection name');
-      return;
-    }
-    
-    try {
-      const response = await fetch('http://localhost:5001/api/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ name, description })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create collection');
-      }
-      
-      // Close modal
-      document.body.removeChild(modal);
-      
-      // Show success message and reload collections
-      alert('Collection created successfully!');
-      loadCollection();
-    } catch (error) {
-      console.error('Error creating collection:', error);
-      alert('Error creating collection: ' + error.message);
-    }
-  });
-  
-  // Close modal when clicking outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      document.body.removeChild(modal);
-    }
-  });
-}
+
 
 async function loadCollection() {
   const notesList = document.querySelector(".notes-list");

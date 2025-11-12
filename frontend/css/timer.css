@@ -110,13 +110,7 @@
   text-align: center;
 }
 
-.break {
-  background-color: #4CAF50; /* Green color for break time */
-}
 
-.break:hover {
-  background-color: #45a049;
-}
 
 .mode-card i {
   font-size: 3rem;
@@ -158,6 +152,14 @@
   font-size: 2rem;
   color: var(--primary-color);
   margin-bottom: 30px;
+}
+
+.timer-screen h2.study {
+  color: var(--primary-color);
+}
+
+.timer-screen h2.break {
+  color: #4CAF50; /* Green color for break time */
 }
 
 .timer-display {
