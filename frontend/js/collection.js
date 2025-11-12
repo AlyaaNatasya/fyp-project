@@ -102,40 +102,28 @@ async function loadCollection() {
       if (summaries.length > 0) {
         const collectionSection = document.createElement("div");
         collectionSection.classList.add("collection-section");
+        
+        // Make the section navigate to specific collection page
+        // Properly escape collection name to prevent XSS issues
+        const escapedCollectionName = collection.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        
         collectionSection.innerHTML = `
-          <h3 class="collection-title">${collection.name}</h3>
-          <div class="collection-summaries-list"></div>
+          <div class="collection-item" data-collection-id="${collection.id}">
+            <h3 class="collection-header">
+              <span class="collection-title" title="${escapedCollectionName}">${escapedCollectionName}</span>
+              <span class="collection-count">${summaries.length}</span>
+            </h3>
+          </div>
         `;
-        
-        const summariesContainer = collectionSection.querySelector(".collection-summaries-list");
-        
-        // Add each summary as a card
-        summaries.forEach((summary) => {
-          const summaryCard = document.createElement("div");
-          summaryCard.classList.add("collection-note");
-          summaryCard.innerHTML = `
-            <div class="note-header">
-              <h4>${summary.original_filename}</h4>
-              <button class="delete-note-btn" title="Remove from collection" data-collection-id="${collection.id}" data-summary-id="${summary.id}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-            <small>${formatDate(new Date(summary.created_at))}</small>
-            <p>${summary.summary_text.substring(0, 150)}${
-              summary.summary_text.length > 150 ? "..." : ""
-            }</p>
-          `;
 
-          // Add event listener to the delete button
-          const deleteBtn = summaryCard.querySelector('.delete-note-btn');
-          deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent triggering any parent click events
-            removeSummaryFromCollection(collection.id, summary.id, summaryCard);
-          });
-
-          summariesContainer.appendChild(summaryCard);
+        // Add click event to navigate to specific collection page
+        const collectionHeader = collectionSection.querySelector(".collection-header");
+        collectionHeader.addEventListener('click', function() {
+          const collectionId = this.closest('.collection-item').getAttribute('data-collection-id');
+          // Navigate to the specific collection page
+          window.location.href = `collection-detail.html?collectionId=${collectionId}`;
         });
-        
+
         notesList.appendChild(collectionSection);
       }
     }
@@ -178,13 +166,13 @@ async function removeSummaryFromCollection(collectionId, summaryId, summaryCard)
 
     setTimeout(() => {
       summaryCard.remove();
-      
+
       // Check if there are any summaries left in this collection section
       const collectionSection = summaryCard.closest('.collection-section');
       if (collectionSection && collectionSection.querySelector('.collection-summaries-list').children.length === 0) {
         collectionSection.remove();
       }
-      
+
       // Check if there are any collections left, show empty message if not
       const notesList = document.querySelector(".notes-list");
       if (notesList && notesList.children.length === 0) {

@@ -1,14 +1,14 @@
-<!-- frontend/pages/collection.html -->
+<!-- frontend/pages/collection-detail.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StudyBloom - Collection</title>
+    <title>StudyBloom - Collection Detail</title>
     <!-- Global Styles -->
     <link rel="stylesheet" href="../css/main.css" />
     <!-- Page-Specific Styles -->
-    <link rel="stylesheet" href="../css/collection.css" />
+    <link rel="stylesheet" href="../css/collection-detail.css" />
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
@@ -20,14 +20,14 @@
       <!-- This will be replaced with the shared sidebar -->
       <div id="sidebar-placeholder"></div>
 
-      <!-- Collection-specific content will be injected here -->
+      <!-- Collection detail content will be injected here -->
       <script type="text/template" id="page-content">
         <!-- Header -->
         <header class="header">
           <button class="menu-toggle">
             <i class="fas fa-bars"></i>
           </button>
-          <h1>Collection</h1>
+          <h1><span id="collection-name">Collection</span></h1>
           <a href="#" class="logout-btn">Log out</a>
         </header>
 
@@ -36,13 +36,18 @@
           <h2>Hello, <span id="username">taca</span>!</h2>
         </div>
 
-        <!-- Collection Section -->
-        <div class="collection-container">
-          <h3 class="collection-header-text">Collection Notes</h3>
+        <!-- Collection Detail Section -->
+        <div class="collection-detail-container">
+          <div class="collection-detail-header">
+            <button class="back-to-collections-btn">
+              <i class="fas fa-arrow-left"></i> Back to All Collections
+            </button>
+          </div>
 
-          <!-- Empty State or Notes List -->
-          <div class="notes-list">
-            <p class="empty-message">No summaries saved yet. Generate a summary and save it to your collection.</p>
+          <div class="collection-detail-content">
+            <div class="collection-summaries-list">
+              <p class="loading-message">Loading collection contents...</p>
+            </div>
           </div>
         </div>
       </script>
@@ -51,6 +56,6 @@
     <!-- Shared JS -->
     <script src="../js/main.js"></script>
     <!-- Page-Specific JS -->
-    <script src="../js/collection.js"></script>
+    <script src="../js/collection-detail.js"></script>
   </body>
 </html>

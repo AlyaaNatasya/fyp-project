@@ -139,13 +139,36 @@ function setupGlobalUI() {
   const sidebar = document.querySelector(".sidebar");
   const logoutBtn = document.querySelector(".logout-btn");
 
+  // Restore sidebar state from localStorage on page load
+  if (sidebar) {
+    const savedState = localStorage.getItem('sidebarState');
+    if (savedState === 'collapsed') {
+      sidebar.classList.add('collapsed');
+    } else if (savedState === 'active') {
+      sidebar.classList.add('active');
+    }
+    // Default state is expanded (no classes needed)
+  }
+
   if (menuToggle && sidebar) {
     menuToggle.addEventListener("click", function (e) {
       e.preventDefault();
       if (window.innerWidth <= 768) {
         sidebar.classList.toggle("active");
+        // Save mobile sidebar state
+        if (sidebar.classList.contains("active")) {
+          localStorage.setItem('sidebarState', 'active');
+        } else {
+          localStorage.setItem('sidebarState', 'inactive');
+        }
       } else {
         sidebar.classList.toggle("collapsed");
+        // Save desktop sidebar state
+        if (sidebar.classList.contains("collapsed")) {
+          localStorage.setItem('sidebarState', 'collapsed');
+        } else {
+          localStorage.setItem('sidebarState', 'expanded');
+        }
       }
     });
   }
@@ -154,6 +177,8 @@ function setupGlobalUI() {
     if (window.innerWidth <= 768 && sidebar && menuToggle) {
       if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
         sidebar.classList.remove("active");
+        // Save mobile sidebar state as inactive
+        localStorage.setItem('sidebarState', 'inactive');
       }
     }
   });
@@ -162,10 +187,11 @@ function setupGlobalUI() {
     logoutBtn.addEventListener("click", function (e) {
       e.preventDefault();
       localStorage.removeItem("token");
+      localStorage.removeItem("sidebarState"); // Clear sidebar state on logout
       window.location.href = "home.html";
     });
   }
-  
+
   // Add event listener for new folder button to create collections
   const newFolderBtn = document.querySelector(".new-folder-btn");
   if (newFolderBtn) {
@@ -195,27 +221,27 @@ function showCreateCollectionModal() {
       </form>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
+
   // Add event listeners
   const closeModal = modal.querySelector('.close-modal');
   closeModal.addEventListener('click', () => {
     document.body.removeChild(modal);
   });
-  
+
   const form = modal.querySelector('#createCollectionForm');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const name = modal.querySelector('#collectionName').value.trim();
     const description = modal.querySelector('#collectionDescription').value.trim();
-    
+
     if (!name) {
       alert('Please enter a collection name');
       return;
     }
-    
+
     try {
       const response = await fetch('http://localhost:5001/api/collections', {
         method: 'POST',
@@ -225,15 +251,15 @@ function showCreateCollectionModal() {
         },
         body: JSON.stringify({ name, description })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create collection');
       }
-      
+
       // Close modal
       document.body.removeChild(modal);
-      
+
       // Show success message and reload collections if on collection page
       alert('Collection created successfully!');
       if (window.location.pathname.includes('collection.html')) {
@@ -245,7 +271,7 @@ function showCreateCollectionModal() {
       alert('Error creating collection: ' + error.message);
     }
   });
-  
+
   // Close modal when clicking outside
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
@@ -287,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     loadSharedLayout(); // This will call initPageAfterLoad() after content is loaded
   }
-  
+
   // Apply mobile optimizations
   preventMobileZoom();
 });
