@@ -175,7 +175,7 @@
 .delete-note-btn {
   background: none;
   border: none;
-  color: #ff4757;
+  color: #a67c52;
   cursor: pointer;
   font-size: 1.2rem;
   padding: 5px;
@@ -186,7 +186,7 @@
 
 .delete-note-btn:hover {
   background-color: #ffece6;
-  color: #ff2e43;
+  color: #a67c52;
 }
 
 .collection-note p {
@@ -306,30 +306,48 @@
 }
 
 .collection-header {
-  background-color: var(--primary-color);
-  padding: 8px 12px;
+  background-color: #e8c49a; /* Folder-like tan color */
+  padding: 12px 15px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.3s;
-  border-radius: var(--radius);
+  transition: all 0.3s;
+  border-radius: 6px 6px 0 0; /* Top rounded corners to look like folder tabs */
   margin-bottom: 5px;
   border: none;
   outline: none;
   width: 100%;
   text-align: left;
   font-size: 1.1rem;
-  color: white;
+  color: #333;
+  position: relative;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  border-bottom: 3px solid #d4a86a; /* Darker border to simulate folder lip */
+  font-weight: 600;
 }
 
 .collection-header:hover {
-  background-color: #a67c52;
+  background-color: #e1b887;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.collection-header::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  width: 30px;
+  height: 8px;
+  background-color: #d4a86a;
+  border-radius: 4px 4px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .collection-title {
   margin: 0;
-  color: white;
+  color: #ffffff;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
@@ -338,21 +356,55 @@
 }
 
 .folder-icon {
-  color: white;
+  color: #ffffff;
+  font-size: 1.3rem;
 }
 
 .folder-icon {
   transition: transform 0.2s;
-  color: white;
+  color: #ffffff;
 }
 
 .collection-count {
-  background-color: white;
-  color: var(--primary-color);
+  background-color: #ffffff;
+  color: #a67c52;
+  border: 1px solid #d4a86a;
   border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 0.9rem;
+  padding: 4px 10px;
+  font-size: 0.85rem;
   font-weight: bold;
+  min-width: 28px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+
+.collection-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-collection-btn {
+  background: none;
+  border: none;
+  color: #a67c52;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.delete-collection-btn:hover {
+  background-color: #f0e6d9;
+  color: #8a6543;
+  transform: scale(1.1);
 }
 
 .collection-summaries-list {
@@ -397,27 +449,27 @@
     gap: 10px;
     padding: 10px;
   }
-  
+
   .collection-header h3 {
     font-size: 1.3rem;
     padding: 6px 12px;
   }
-  
+
   .empty-message {
     font-size: 1.1rem;
     padding: 0 10px;
   }
-  
+
   .collection-note {
     padding: 15px;
   }
-  
+
   .note-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .delete-note-btn {
     align-self: flex-end;
     margin-left: 0;

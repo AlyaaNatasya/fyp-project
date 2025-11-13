@@ -1,6 +1,6 @@
 /* frontend/css/collection-detail.css */
 
-/* Main Content - White Background (consistent with other pages) */
+/* Main Content - White Background */
 .main-content {
   margin-left: 250px;
   padding: 20px 50px;
@@ -74,15 +74,12 @@
   max-width: 1000px;
   margin: 0 auto;
   text-align: center;
-  padding: 0 20px;
 }
 
 /* Collection Detail Header */
 .collection-detail-header {
   margin-bottom: 30px;
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
+  text-align: left;
 }
 
 .back-to-collections-btn {
@@ -97,8 +94,6 @@
   align-items: center;
   gap: 8px;
   transition: var(--transition);
-  margin-left: 0;
-  width: auto;
 }
 
 .back-to-collections-btn:hover {
@@ -146,7 +141,6 @@
 .collection-note small {
   color: #666;
   font-size: 0.9rem;
-  margin: 5px 0 8px 0;
 }
 
 /* Note Header to contain title and delete button */
@@ -154,7 +148,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 /* Delete Button */
@@ -168,6 +162,7 @@
   margin-left: 10px;
   border-radius: 4px;
   transition: var(--transition);
+  align-self: flex-start;
 }
 
 .delete-note-btn:hover {
@@ -176,12 +171,76 @@
 }
 
 .collection-note p {
-  margin: 5px 0 0 0;
+  margin: 10px 0 0 0;
   color: var(--text-dark);
   line-height: 1.5;
-  font-size: 1rem;
-  overflow: visible; /* Make sure text isn't cut off */
-  max-height: none; /* Remove any height restrictions */
+}
+
+/* Summary Button - New clickable button style */
+.summary-button {
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.summary-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border-color: #d4a86a;
+}
+
+.summary-button .summary-content {
+  flex: 1;
+}
+
+.summary-button .summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.summary-button h4 {
+  margin: 0 0 5px 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  flex: 1;
+}
+
+.summary-button small {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.summary-button .summary-preview {
+  margin: 10px 0 0 0;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.summary-arrow {
+  margin-left: 15px;
+  color: #c1946e;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+}
+
+.summary-button:hover .summary-arrow {
+  color: #a67c52;
+  transform: translateX(3px);
 }
 
 /* Loading and Empty Messages */

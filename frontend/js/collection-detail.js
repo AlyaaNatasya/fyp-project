@@ -112,21 +112,26 @@ async function loadCollectionDetail(collectionId) {
     // Clear loading message
     summariesList.innerHTML = "";
 
-    // Add each summary as a card
+    // Add each summary as a button-like card
     summaries.forEach((summary) => {
       const summaryCard = document.createElement("div");
-      summaryCard.classList.add("collection-note");
+      summaryCard.classList.add("summary-button");
       summaryCard.innerHTML = `
-        <div class="note-header">
-          <h4>${summary.original_filename}</h4>
-          <button class="delete-note-btn" title="Remove from collection" data-collection-id="${collectionId}" data-summary-id="${summary.id}">
-            <i class="fas fa-trash"></i>
-          </button>
+        <div class="summary-content">
+          <div class="summary-header">
+            <h4>${summary.original_filename}</h4>
+            <button class="delete-note-btn" title="Remove from collection" data-collection-id="${collectionId}" data-summary-id="${summary.id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <small>${formatDate(new Date(summary.created_at))}</small>
+          <p class="summary-preview">${summary.summary_text.substring(0, 150)}${
+            summary.summary_text.length > 150 ? "..." : ""
+          }</p>
         </div>
-        <small>${formatDate(new Date(summary.created_at))}</small>
-        <p>${summary.summary_text.substring(0, 150)}${
-          summary.summary_text.length > 150 ? "..." : ""
-        }</p>
+        <div class="summary-arrow">
+          <i class="fas fa-arrow-right"></i>
+        </div>
       `;
 
       // Add click event to navigate to the summary page

@@ -73,9 +73,7 @@ async function loadCollection() {
     const collections = await response.json();
 
     if (collections.length === 0) {
-      notesList.innerHTML = `
-        <p class="empty-message">No collections created yet. Add your first collection using the button above.</p>
-      `;
+      notesList.innerHTML = '';
       return;
     }
 
@@ -110,29 +108,48 @@ async function loadCollection() {
         collectionSection.innerHTML = `
           <div class="collection-item" data-collection-id="${collection.id}">
             <h3 class="collection-header">
-              <span class="collection-title" title="${escapedCollectionName}">${escapedCollectionName}</span>
-              <span class="collection-count">${summaries.length}</span>
+              <span class="collection-title" title="${escapedCollectionName}">
+                <i class="fas fa-folder folder-icon"></i>
+                ${escapedCollectionName}
+              </span>
+              <div class="collection-actions">
+                <span class="collection-count">${summaries.length}</span>
+                <button class="delete-collection-btn" title="Delete collection">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </h3>
           </div>
         `;
 
         // Add click event to navigate to specific collection page
         const collectionHeader = collectionSection.querySelector(".collection-header");
-        collectionHeader.addEventListener('click', function() {
-          const collectionId = this.closest('.collection-item').getAttribute('data-collection-id');
-          // Navigate to the specific collection page
-          window.location.href = `collection-detail.html?collectionId=${collectionId}`;
+        collectionHeader.addEventListener('click', function(event) {
+          // Only navigate if the click wasn't on the delete button
+          if (!event.target.closest('.delete-collection-btn')) {
+            const collectionId = this.closest('.collection-item').getAttribute('data-collection-id');
+            // Navigate to the specific collection page
+            window.location.href = `collection-detail.html?collectionId=${collectionId}`;
+          }
         });
+        
+        // Add click event for the delete button
+        const deleteBtn = collectionSection.querySelector('.delete-collection-btn');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent triggering the header click event
+            const collectionId = collectionSection.querySelector('.collection-item').getAttribute('data-collection-id');
+            deleteCollection(collectionId, collectionSection);
+          });
+        }
 
         notesList.appendChild(collectionSection);
       }
     }
 
-    // If no collections have summaries, show empty message
+    // If no collections have summaries, leave the list empty
     if (notesList.children.length === 0) {
-      notesList.innerHTML = `
-        <p class="empty-message">No summaries saved yet. Generate a summary and save it to your collection.</p>
-      `;
+      notesList.innerHTML = '';
     }
   } catch (error) {
     console.error('Error loading collections:', error);
@@ -184,6 +201,49 @@ async function removeSummaryFromCollection(collectionId, summaryId, summaryCard)
   } catch (error) {
     console.error('Error removing summary from collection:', error);
     alert("Error removing summary from collection: " + error.message);
+  }
+}
+
+async function deleteCollection(collectionId, collectionElement) {
+  if (!confirm("Are you sure you want to delete this collection? This will also delete all summaries in this collection.")) {
+    return; // Exit if user cancels
+  }
+
+  try {
+    // Call the API to delete the collection
+    const response = await fetch(`http://localhost:5001/api/collections/${collectionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to delete collection');
+    }
+
+    // Remove the collection element from the DOM with animation
+    collectionElement.style.opacity = '0';
+    collectionElement.style.transform = 'translateX(-20px)';
+    collectionElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+    setTimeout(() => {
+      collectionElement.remove();
+
+      // Check if there are any collections left, show empty message if not
+      const notesList = document.querySelector(".notes-list");
+      if (notesList && notesList.children.length === 0) {
+        notesList.innerHTML = `
+          <p class="empty-message">No collections created yet. Add your first collection using the button above.</p>
+        `;
+      }
+    }, 300);
+
+    alert("Collection deleted successfully!");
+  } catch (error) {
+    console.error('Error deleting collection:', error);
+    alert("Error deleting collection: " + error.message);
   }
 }
 
