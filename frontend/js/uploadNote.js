@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // --- File Upload Logic (wrapped in reusable function) ---
 function initUploadNotePage() {
+  // Remove any existing event listeners to prevent duplicates
   const fileInput = document.getElementById("file-input");
   const chooseFileBtn = document.querySelector(".choose-file-btn");
   const generateBtn = document.querySelector(".generate-btn");
@@ -57,21 +58,34 @@ function initUploadNotePage() {
 
   console.log("✅ Upload elements found — initializing event listeners...");
 
-  chooseFileBtn.addEventListener("click", (e) => {
+  // Remove existing event listeners to prevent accumulation on page refresh
+  // Store original event listeners to remove them first
+  if (fileInput._chooseFileListener) {
+    fileInput.removeEventListener("change", fileInput._chooseFileListener);
+  }
+  if (chooseFileBtn._clickListener) {
+    chooseFileBtn.removeEventListener("click", chooseFileBtn._clickListener);
+  }
+  if (generateBtn._clickListener) {
+    generateBtn.removeEventListener("click", generateBtn._clickListener);
+  }
+
+  // Define event listeners
+  const chooseFileListener = (e) => {
     e.preventDefault();
     fileInput.click();
-  });
+  };
 
-  fileInput.addEventListener("change", () => {
+  const fileChangeListener = () => {
     if (fileInput.files.length > 0) {
       const fileName = fileInput.files[0].name;
       chooseFileBtn.innerHTML = `<i class="fas fa-check"></i> ${fileName}`;
     } else {
       chooseFileBtn.innerHTML = `<i class="fas fa-upload"></i> Choose File`;
     }
-  });
+  };
 
-  generateBtn.addEventListener("click", async () => {
+  const generateBtnListener = async () => {
     if (!fileInput.files.length) {
       alert("Please select a file first.");
       return;
@@ -104,8 +118,7 @@ function initUploadNotePage() {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          // Note: Don't set Content-Type header when using FormData
-          // The browser will set it automatically with the correct boundary
+          // Don't set Content-Type when using FormData - browser sets it automatically
         },
         body: formData,
         signal: controller.signal, // Add the abort signal
@@ -189,9 +202,13 @@ function initUploadNotePage() {
     } catch (error) {
       console.error("Error uploading file:", error);
       console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
 
       if (error.name === "AbortError") {
         alert("Request timeout: The server did not accept the file in time.");
+      } else if (error.name === "TypeError" && error.message.includes("fetch")) {
+        alert(`Network error: ${error.message}. Please check if the backend server is running.`);
       } else {
         alert(`Error: ${error.message}`);
       }
@@ -200,7 +217,17 @@ function initUploadNotePage() {
       generateBtn.textContent = originalText;
       generateBtn.disabled = false;
     }
-  });
+  };
+
+  // Attach event listeners
+  chooseFileBtn.addEventListener("click", chooseFileListener);
+  fileInput.addEventListener("change", fileChangeListener);
+  generateBtn.addEventListener("click", generateBtnListener);
+
+  // Store references to the event listeners so we can remove them later if needed
+  fileInput._chooseFileListener = fileChangeListener;
+  chooseFileBtn._clickListener = chooseFileListener;
+  generateBtn._clickListener = generateBtnListener;
 }
 
 // ✅ Expose for main.js to call after template is injected

@@ -77,6 +77,10 @@ backend/.env
 frontend/dist/
 frontend/build/
 
+# Memory Bank (excluded from version control)
+memory-bank/
+.clinerules/
+
 # Python
 __pycache__/
 *.py[cod]

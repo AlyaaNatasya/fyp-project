@@ -121,7 +121,10 @@ function initPageAfterLoad() {
     }
 
     // ✅ Initialize Dashboard Page
-    if (currentPage === "dashboard.html" && typeof window.initDashboardPage === "function") {
+    if (
+      currentPage === "dashboard.html" &&
+      typeof window.initDashboardPage === "function"
+    ) {
       window.initDashboardPage();
     }
   } catch (err) {
@@ -141,11 +144,11 @@ function setupGlobalUI() {
 
   // Restore sidebar state from localStorage on page load
   if (sidebar) {
-    const savedState = localStorage.getItem('sidebarState');
-    if (savedState === 'collapsed') {
-      sidebar.classList.add('collapsed');
-    } else if (savedState === 'active') {
-      sidebar.classList.add('active');
+    const savedState = localStorage.getItem("sidebarState");
+    if (savedState === "collapsed") {
+      sidebar.classList.add("collapsed");
+    } else if (savedState === "active") {
+      sidebar.classList.add("active");
     }
     // Default state is expanded (no classes needed)
   }
@@ -157,17 +160,17 @@ function setupGlobalUI() {
         sidebar.classList.toggle("active");
         // Save mobile sidebar state
         if (sidebar.classList.contains("active")) {
-          localStorage.setItem('sidebarState', 'active');
+          localStorage.setItem("sidebarState", "active");
         } else {
-          localStorage.setItem('sidebarState', 'inactive');
+          localStorage.setItem("sidebarState", "inactive");
         }
       } else {
         sidebar.classList.toggle("collapsed");
         // Save desktop sidebar state
         if (sidebar.classList.contains("collapsed")) {
-          localStorage.setItem('sidebarState', 'collapsed');
+          localStorage.setItem("sidebarState", "collapsed");
         } else {
-          localStorage.setItem('sidebarState', 'expanded');
+          localStorage.setItem("sidebarState", "expanded");
         }
       }
     });
@@ -178,7 +181,7 @@ function setupGlobalUI() {
       if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
         sidebar.classList.remove("active");
         // Save mobile sidebar state as inactive
-        localStorage.setItem('sidebarState', 'inactive');
+        localStorage.setItem("sidebarState", "inactive");
       }
     }
   });
@@ -202,8 +205,8 @@ function setupGlobalUI() {
 // Function to show create collection modal
 function showCreateCollectionModal() {
   // Create a modal for creating a new collection
-  const modal = document.createElement('div');
-  modal.classList.add('modal');
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close-modal">&times;</span>
@@ -225,55 +228,61 @@ function showCreateCollectionModal() {
   document.body.appendChild(modal);
 
   // Add event listeners
-  const closeModal = modal.querySelector('.close-modal');
-  closeModal.addEventListener('click', () => {
+  const closeModal = modal.querySelector(".close-modal");
+  closeModal.addEventListener("click", () => {
     document.body.removeChild(modal);
   });
 
-  const form = modal.querySelector('#createCollectionForm');
-  form.addEventListener('submit', async (e) => {
+  const form = modal.querySelector("#createCollectionForm");
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = modal.querySelector('#collectionName').value.trim();
-    const description = modal.querySelector('#collectionDescription').value.trim();
+    const name = modal.querySelector("#collectionName").value.trim();
+    const description = modal
+      .querySelector("#collectionDescription")
+      .value.trim();
 
     if (!name) {
-      alert('Please enter a collection name');
+      alert("Please enter a collection name");
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/collections', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5001/api/collections", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ name, description })
+        body: JSON.stringify({ name, description }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create collection');
+        throw new Error(errorData.message || "Failed to create collection");
       }
 
       // Close modal
       document.body.removeChild(modal);
 
       // Show success message and reload collections if on collection page
-      alert('Collection created successfully!');
-      if (window.location.pathname.includes('collection.html')) {
-        // Reload the collection page to show the new collection
-        window.location.reload();
+      alert("Collection created successfully!");
+
+      // Dynamically reload collections if on collection page and function exists
+      if (
+        window.location.pathname.includes("collection.html") &&
+        typeof window.loadCollection === "function"
+      ) {
+        window.loadCollection();
       }
     } catch (error) {
-      console.error('Error creating collection:', error);
-      alert('Error creating collection: ' + error.message);
+      console.error("Error creating collection:", error);
+      alert("Error creating collection: " + error.message);
     }
   });
 
   // Close modal when clicking outside
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       document.body.removeChild(modal);
     }
@@ -294,11 +303,11 @@ function initReadMoreButton() {
 
 // Prevent zoom on mobile devices for form inputs
 function preventMobileZoom() {
-  const inputs = document.querySelectorAll('input, select, textarea');
-  inputs.forEach(input => {
-    input.addEventListener('focus', function() {
+  const inputs = document.querySelectorAll("input, select, textarea");
+  inputs.forEach((input) => {
+    input.addEventListener("focus", function () {
       if (window.innerWidth <= 768) {
-        document.body.style.zoom = '1';
+        document.body.style.zoom = "1";
       }
     });
   });

@@ -44,6 +44,10 @@ const corsOptions = {
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  optionsSuccessStatus: 200,
+  preflightContinue: false,
 };
 
 // Security headers - with a specific configuration for Cross-Origin-Resource-Policy
