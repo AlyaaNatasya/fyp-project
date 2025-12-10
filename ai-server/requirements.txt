@@ -1,6 +1,0 @@
-transformers
-torch
-flask
-flask-cors
-safetensors
-PyPDF2
