@@ -158,7 +158,7 @@ const generateSummaryFromUpload = async (req, res) => {
           );
         }
         // ... (Your text truncation logic) ...
-        const maxLength = 2000;
+        const maxLength = 8000; // Increased from 2000 to 8000 to allow more of the document to be processed
         if (extractedText.length > maxLength) {
           let truncatedText = extractedText.substring(0, maxLength);
           const sentenceEndings = [

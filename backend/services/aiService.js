@@ -32,7 +32,7 @@ async function generateSummary(text) {
     }
 
     // Prepare the prompt for summarization
-    const prompt = `Generate a concise and informative summary of the following academic content. Focus on key concepts, main points, and important details. Structure the summary with bullet points or clear paragraphs if appropriate:\n\n${cleanText}`;
+    const prompt = `Generate a comprehensive and informative summary of the following academic content. Include all key concepts, main points, and important details from the entire document. Structure the summary with clear headings, bullet points, and paragraphs as appropriate. Use markdown formatting to make the summary well-organized and easy to read:\n\n${cleanText}`;
 
     // Call the DeepSeek API
     const response = await axios.post('https://api.deepseek.com/chat/completions', {
@@ -40,7 +40,7 @@ async function generateSummary(text) {
       messages: [
         {
           role: "system",
-          content: "You are an excellent academic content summarizer. Create clear, concise, and informative summaries that capture the key concepts, main points, and important details from the provided text. Structure your response logically with bullet points or paragraphs as appropriate."
+          content: "You are an excellent academic content summarizer. Create comprehensive, clear, and informative summaries that capture all key concepts, main points, and important details from the provided text. Structure your response with proper markdown formatting including headings, subheadings, bullet points, and paragraphs to make it well-organized and easy to read. Ensure the summary represents the entire document content, not just the beginning."
         },
         {
           role: "user",
@@ -48,7 +48,7 @@ async function generateSummary(text) {
         }
       ],
       temperature: 0.3, // Lower temperature for more consistent summaries
-      max_tokens: 1000, // Adjust based on desired summary length
+      max_tokens: 2000, // Increased from 1000 to 2000 to allow for more comprehensive summaries
       stream: false // Set to false to get complete response
     }, {
       headers: {

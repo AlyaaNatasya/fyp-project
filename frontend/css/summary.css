@@ -164,7 +164,7 @@
   .summary-container {
     gap: 30px;
   }
-  
+
   .notes-section,
   .summary-section {
     height: 500px;
@@ -186,17 +186,17 @@
   .summary-section {
     height: 400px;
   }
-  
+
   .notes-section h3,
   .summary-section h3 {
     font-size: 1.3rem;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .save-btn,
   .mindmap-btn {
     padding: 12px;
@@ -210,35 +210,35 @@
     height: 350px;
     padding: 20px 15px;
   }
-  
+
   .summary-box {
     height: 300px;
     padding: 15px;
   }
-  
+
   .notes-box {
     font-size: 1rem;
   }
-  
+
   .header {
     flex-direction: column;
     gap: 10px;
     text-align: center;
   }
-  
+
   .menu-toggle {
     align-self: flex-start;
   }
-  
+
   .logout-btn {
     width: 100%;
     text-align: center;
   }
-  
+
   .welcome-section h2 {
     font-size: 1.5rem;
   }
-  
+
   .save-btn,
   .mindmap-btn {
     width: 100%;
@@ -246,4 +246,112 @@
     margin-left: auto;
     margin-right: auto;
   }
+}
+
+/* Markdown rendering styles for summary content */
+.summary-box h1,
+.summary-box h2,
+.summary-box h3,
+.summary-box h4,
+.summary-box h5,
+.summary-box h6 {
+  margin: 1.2em 0 0.8em 0;
+  line-height: 1.3;
+  color: var(--primary-color);
+}
+
+.summary-box h1 {
+  font-size: 1.8em;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.summary-box h2 {
+  font-size: 1.6em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.summary-box h3 {
+  font-size: 1.4em;
+}
+
+.summary-box h4 {
+  font-size: 1.2em;
+}
+
+.summary-box p {
+  margin: 0.8em 0;
+}
+
+.summary-box strong,
+.summary-box b {
+  font-weight: bold;
+}
+
+.summary-box em,
+.summary-box i {
+  font-style: italic;
+}
+
+.summary-box ul,
+.summary-box ol {
+  margin: 0.8em 0;
+  padding-left: 2em;
+}
+
+.summary-box ul {
+  list-style-type: disc;
+}
+
+.summary-box ol {
+  list-style-type: decimal;
+}
+
+.summary-box li {
+  margin: 0.4em 0;
+}
+
+.summary-box blockquote {
+  margin: 0.8em 0;
+  padding: 0.4em 1em;
+  border-left: 4px solid var(--primary-color);
+  background-color: #f9f9f9;
+}
+
+.summary-box code {
+  font-family: 'Courier New', monospace;
+  background-color: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.summary-box pre {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  padding: 1em;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+
+.summary-box pre code {
+  background: none;
+  padding: 0;
+}
+
+.summary-box a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.summary-box a:hover {
+  color: #a67c52;
+}
+
+.summary-box hr {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 1.5em 0;
 }
