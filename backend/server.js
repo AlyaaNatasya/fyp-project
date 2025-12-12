@@ -14,23 +14,15 @@ const collectionRoutes = require("./routes/collectionRoutes");
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// CORS configuration that allows multiple origins including different localhost ports
+// Simple CORS configuration as both backend and frontend are served from the same origin
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // Allow requests from localhost on various ports during development
     if (
-      origin === "http://localhost:5500" ||
-      origin === "http://127.0.0.1:5500" ||
-      origin === "http://localhost:3000" ||
-      origin === "http://localhost:3001" ||
-      origin === "http://localhost:8080" ||
-      origin === "http://localhost:8000" ||
-      origin === "http://127.0.0.1:3000" ||
-      origin.startsWith("http://localhost:") ||
-      origin.startsWith("http://127.0.0.1:")
+      origin === `http://127.0.0.1:${PORT}` ||
+      origin === `http://localhost:${PORT}`
     ) {
       return callback(null, true);
     }
@@ -52,7 +44,6 @@ const corsOptions = {
     "Content-Type",
     "Accept",
     "Authorization",
-    "X-Requested-With",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
   optionsSuccessStatus: 200,
@@ -69,8 +60,17 @@ app.use(
         scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
         workerSrc: ["'self'", "blob:"], // Allow web workers from same origin and blob URLs for PDF.js
         imgSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, and cdnjs
-        styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"], // Allow inline styles, cdnjs, and Google Fonts
-        fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"], // Allow fonts from same origin, cdnjs, and Google Fonts
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdnjs.cloudflare.com",
+          "https://fonts.googleapis.com",
+        ], // Allow inline styles, cdnjs, and Google Fonts
+        fontSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "https://fonts.gstatic.com",
+        ], // Allow fonts from same origin, cdnjs, and Google Fonts
       },
     },
   })
