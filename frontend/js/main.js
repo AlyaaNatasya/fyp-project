@@ -101,8 +101,11 @@ function initPageAfterLoad() {
       });
     }
 
-    // ✅ Setup global UI (hamburger, logout)
+    // ✅ Setup global UI (hamburger, logout, dropdowns)
     setupGlobalUI();
+
+    // ✅ Load Sidebar Collections
+    loadSidebarCollections();
 
     // ✅ Run page-specific logic only after content is ready
     if (
@@ -200,6 +203,59 @@ function setupGlobalUI() {
   if (newFolderBtn) {
     newFolderBtn.addEventListener("click", showCreateCollectionModal);
   }
+
+  // Collection Dropdown Toggle
+  const collectionToggle = document.getElementById("collection-dropdown-toggle");
+  if (collectionToggle) {
+    collectionToggle.addEventListener("click", function(e) {
+      // If clicking the link inside, don't toggle if it's meant to navigate (but here it's a div)
+      const parentLi = this.closest(".nav-item-dropdown");
+      parentLi.classList.toggle("active");
+    });
+  }
+}
+
+/**
+ * Loads collections into the sidebar dropdown
+ */
+async function loadSidebarCollections() {
+  const submenu = document.getElementById("collection-submenu");
+  if (!submenu) return;
+
+  try {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch collections");
+
+    const collections = await response.json();
+
+    // Keep the first item ("All Collections") and remove the rest
+    const allCollectionsLink = submenu.firstElementChild;
+    submenu.innerHTML = "";
+    if (allCollectionsLink) {
+      submenu.appendChild(allCollectionsLink);
+    }
+
+    // Append collections
+    collections.forEach((collection) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <a href="../pages/collection-detail.html?collectionId=${collection.id}" class="nav-link">
+          <i class="fas fa-folder"></i>
+          <span>${collection.name}</span>
+        </a>
+      `;
+      submenu.appendChild(li);
+    });
+
+  } catch (error) {
+    console.error("Error loading sidebar collections:", error);
+  }
 }
 
 // Function to show create collection modal
@@ -267,6 +323,9 @@ function showCreateCollectionModal() {
 
       // Show success message and reload collections if on collection page
       alert("Collection created successfully!");
+
+      // Refresh Sidebar Collections
+      loadSidebarCollections();
 
       // Dynamically reload collections if on collection page and function exists
       if (

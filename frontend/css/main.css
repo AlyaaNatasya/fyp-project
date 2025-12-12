@@ -137,6 +137,47 @@ body {
   color: var(--primary-bg);
 }
 
+/* Dropdown Styles */
+.nav-item-dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+  justify-content: space-between;
+}
+
+.dropdown-icon {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.nav-item-dropdown.active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.sub-menu {
+  list-style: none;
+  padding-left: 20px;
+  display: none;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  margin-top: 5px;
+}
+
+.nav-item-dropdown.active .sub-menu {
+  display: block;
+}
+
+.sub-menu li {
+  margin-bottom: 5px;
+}
+
+.sub-menu .nav-link {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
 /* Collapsed Sidebar (Desktop) */
 .sidebar.collapsed {
   transform: translateX(-210px); /* Show only toggle bar */
@@ -145,7 +186,9 @@ body {
 
 .sidebar.collapsed .sidebar-header h3,
 .sidebar.collapsed .nav-menu li a span,
-.sidebar.collapsed .new-folder-btn {
+.sidebar.collapsed .new-folder-btn,
+.sidebar.collapsed .dropdown-icon,
+.sidebar.collapsed .sub-menu {
   display: none;
 }
 

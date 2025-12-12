@@ -11,10 +11,21 @@
           ><i class="fas fa-home"></i> <span>Home</span></a
         >
       </li>
-      <li>
-        <a href="../pages/collection.html" class="nav-link"
-          ><i class="fas fa-book"></i> <span>Collection</span></a
-        >
+      <li class="nav-item-dropdown">
+        <div class="nav-link dropdown-toggle" id="collection-dropdown-toggle">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-book"></i> <span>Collection</span>
+          </div>
+          <i class="fas fa-chevron-down dropdown-icon"></i>
+        </div>
+        <ul class="sub-menu" id="collection-submenu">
+          <li>
+            <a href="../pages/collection.html" class="nav-link">
+              <span>All Collections</span>
+            </a>
+          </li>
+          <!-- Dynamic collections will be added here -->
+        </ul>
       </li>
       <li>
         <a href="../pages/uploadNote.html" class="nav-link"
