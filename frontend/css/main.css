@@ -395,28 +395,40 @@ button, input, select, textarea {
     background-color: #a67c52;
   }
   
-  /* ==========================================
-     LOADING STYLES
-     ========================================== */
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    text-align: center;
-    color: var(--text-dark);
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin: 20px 0;
-  }
-  
-  .loading-container i {
-    font-size: 3rem;
-    color: var(--primary-color);
-    margin-bottom: 15px;
-  }
+/* ==========================================
+   LOADING STYLES
+   ========================================== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dark);
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  /* Removed margin to allow it to take full parent space */
+  /* If placed directly inside a flex item, this helps it expand */
+  flex-grow: 1; 
+  min-height: 100%; /* Ensure it has height even if content is sparse */
+  box-sizing: border-box; /* Include padding in height calculation */
+}
+
+.loading-container i {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  /* Ensure the spinner is perfectly round */
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+  transform-origin: center;
+}
   
   .loading-container span {
     font-size: 1.2rem;

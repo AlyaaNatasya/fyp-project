@@ -99,6 +99,7 @@
   line-height: 1.6;
   color: var(--text-dark);
   white-space: pre-wrap;
+  height: 400px; /* Ensure consistent height with summary-box */
 }
 
 /* Summary Section */
@@ -290,7 +291,7 @@
 }
 
 .summary-box em,
-.summary-box i {
+.summary-box i:not(.fas):not(.fa) {
   font-style: italic;
 }
 
@@ -320,7 +321,7 @@
 }
 
 .summary-box code {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   background-color: #f4f4f4;
   padding: 0.2em 0.4em;
   border-radius: 3px;
@@ -354,4 +355,32 @@
   border: 0;
   border-top: 1px solid #eee;
   margin: 1.5em 0;
+}
+
+/* PDF Viewer Styles */
+.pdf-viewer-container {
+  width: 100%;
+  overflow: auto;
+}
+
+#pdf-viewer-canvas {
+  width: 100%;
+  max-width: 800px;
+  display: block;
+  margin: 0 auto;
+}
+
+#pdf-canvas-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pdf-page-canvas {
+  width: 100% !important;
+  max-width: 800px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin: 5px 0;
 }
