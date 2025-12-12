@@ -52,15 +52,14 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // --- Flashcard & Quiz Generation ---
-  document.querySelectorAll(".generate-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const card = btn.closest(".option-card");
-      const type = card.querySelector("h3").textContent;
+  document.querySelectorAll(".card.option-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const type = card.dataset.type;
 
-      if (type === "Flashcard") {
+      if (type === "flashcard") {
         alert("Generating flashcards...");
-      } else if (type === "Quizzes") {
-        alert("Generating quizzes...");
+      } else if (type === "quiz") {
+        alert("Generating quiz...");
       }
     });
   });

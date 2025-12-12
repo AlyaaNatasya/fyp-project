@@ -127,53 +127,49 @@
   background-color: #a67c52;
 }
 
-/* Generate Options */
-.generate-options {
+/* Card Grid */
+.card-grid {
   display: flex;
   justify-content: center;
   gap: 50px;
   margin-top: 50px;
+  flex-wrap: wrap;
 }
 
-.option-card {
-  background-color: white;
+.card {
+  background-color: var(--primary-color); /* Match dashboard card color */
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px;
-  width: 200px;
+  padding: 40px 20px;
   text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.option-card:hover {
-  transform: translateY(-5px);
-}
-
-.option-card .icon {
-  font-size: 2rem;
-  color: var(--primary-color);
-  margin-bottom: 15px;
-}
-
-.option-card h3 {
-  font-size: 1.2rem;
-  color: var(--text-dark);
-  margin-bottom: 15px;
-}
-
-.generate-btn {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  font-size: 0.9rem;
-  border-radius: var(--radius);
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  height: 250px;
 }
 
-.generate-btn:hover {
-  background-color: #a67c52;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background-color: #a67c52; /* Darker hover effect */
+}
+
+.card h3 {
+  font-size: 3rem;
+  margin: 0 0 15px 0;
+  line-height: 1;
+  color: white; /* White emoji text */
+}
+
+.card-desc {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white; /* White text */
+  margin: 0;
 }
 
 /* Responsive Design */
