@@ -89,6 +89,9 @@ async function loadCollectionDetail(collectionId) {
     const collection = await collectionResponse.json();
     collectionNameElement.textContent = collection.name;
 
+    // Show skeleton loader while fetching summaries
+    renderSkeletonLoader(summariesList);
+
     // Fetch summaries in this collection
     const summariesResponse = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries`, {
       headers: {
@@ -202,4 +205,20 @@ function formatDate(date) {
     month: "short",
     day: "numeric",
   });
+}
+
+function renderSkeletonLoader(container) {
+  if (!container) return;
+  
+  // Create 4 skeleton cards
+  container.innerHTML = Array(4).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-header"></div>
+      <div>
+        <div class="skeleton-text"></div>
+        <div class="skeleton-text"></div>
+        <div class="skeleton-text"></div>
+      </div>
+    </div>
+  `).join('');
 }

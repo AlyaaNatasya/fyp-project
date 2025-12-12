@@ -314,3 +314,45 @@
     margin-left: 0;
   }
 }
+
+/* ==========================================
+   SKELETON LOADER STYLES
+   ========================================== */
+.skeleton-card {
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-header {
+  height: 24px;
+  background-color: #eee;
+  border-radius: 4px;
+  width: 70%;
+  margin-bottom: 15px;
+}
+
+.skeleton-text {
+  height: 16px;
+  background-color: #eee;
+  border-radius: 4px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.skeleton-text:last-child {
+  width: 80%;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
