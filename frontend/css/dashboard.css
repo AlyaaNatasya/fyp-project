@@ -76,43 +76,45 @@
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 25px;
+  gap: 30px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
 .card {
-  background-color: white;
+  background-color: var(--primary-color);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 30px 20px;
+  padding: 35px 20px;
   text-align: center;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  cursor: pointer; /* Make card look clickable */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* Standard height */
+  margin: 0; /* Remove auto margin to let grid handle spacing */
 }
 
 .card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background-color: #a67c52; /* Darker hover effect matching nav color */
 }
 
 .card h3 {
-  font-size: 1.5rem;
-  color: var(--primary-color);
-  margin-bottom: 20px;
+  font-size: 3rem; /* Larger emoji size */
+  margin: 0 0 15px 0;
+  line-height: 1;
+  color: white; /* White emoji text */
 }
 
-.card-btn {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  font-size: 1rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.card-btn:hover {
-  background-color: #a67c52;
+.card-desc {
+  font-size: 1.4rem; /* Larger text */
+  font-weight: 600;
+  color: white; /* White text */
+  margin: 0;
 }
 
 /* Notification Section */

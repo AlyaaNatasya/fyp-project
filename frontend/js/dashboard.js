@@ -10,30 +10,14 @@ window.initDashboardPage = function() {
   // Show upcoming reminders on dashboard
   showUpcomingReminders();
   
-  // --- Dashboard Card Buttons ---
-  document.querySelectorAll(".card-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const action = this.textContent.trim().toLowerCase();
-
-      switch (action) {
-        case "summary":
-          window.location.href = "../pages/uploadNote.html";
-          break;
-
-        case "quizzes":
-          window.location.href = "../pages/quizzes.html";
-          break;
-
-        case "study timer":
-          window.location.href = "../pages/timer.html";
-          break;
-
-        case "reminder":
-          window.location.href = "../pages/calendar.html";
-          break;
-
-        default:
-          alert("Feature coming soon!");
+  // --- Dashboard Cards Click Handler ---
+  document.querySelectorAll(".card").forEach((card) => {
+    card.addEventListener("click", function () {
+      const href = this.dataset.href; // Get the URL from data-href attribute
+      if (href) {
+        window.location.href = href;
+      } else {
+        alert("Feature coming soon!"); // Fallback if data-href is missing
       }
     });
   });
