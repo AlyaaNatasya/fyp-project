@@ -4,10 +4,13 @@
 .main-content {
   margin-left: 250px;
   padding: 20px 50px;
-  min-height: 100vh;
+  height: 100vh; /* Fixed full height */
+  overflow: hidden; /* Prevent page scroll */
   background-color: var(--primary-bg);
   transition: margin-left 0.3s ease;
   color: var(--text-dark);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header */
@@ -76,30 +79,44 @@
   gap: 50px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%; /* Ensure it takes width */
+  flex: 1; /* Fill remaining vertical space */
+  min-height: 0; /* Allow shrinking for scrollable children */
+  overflow: hidden; /* Contain children */
+  padding-bottom: 20px;
 }
 
 /* Notes Section */
 .notes-section {
-  background-color: white;
+  background-color: var(--primary-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  border: 1px solid var(--primary-color); /* Updated border color to match page title line */
   padding: 30px;
-  height: 600px;
-  overflow-y: auto;
+  height: 100%; /* Fill grid cell */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Contain inner scroll */
 }
 
 .notes-section h3 {
   font-size: 1.5rem;
   color: var(--primary-color);
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .notes-box {
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 20px;
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--text-dark);
   white-space: pre-wrap;
-  height: 400px; /* Ensure consistent height with summary-box */
+  height: auto; /* Remove fixed height */
+  flex: 1; /* Grow to fill space */
+  overflow-y: auto;
 }
 
 /* Summary Section */
@@ -108,20 +125,26 @@
   padding: 30px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  height: 600px;
+  border: 1px solid var(--primary-color); /* Updated border color to match page title line */
+  height: 100%; /* Fill grid cell */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Contain inner scroll */
 }
 
 .summary-section h3 {
   font-size: 1.5rem;
   color: var(--primary-color);
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .summary-box {
   background-color: white;
   border-radius: var(--radius);
   padding: 20px;
-  height: 400px;
+  height: auto; /* Remove fixed height */
+  flex: 1; /* Grow to fill space */
   overflow-y: auto;
   font-size: 1.1rem;
   line-height: 1.6;
@@ -360,7 +383,12 @@
 /* PDF Viewer Styles */
 .pdf-viewer-container {
   width: 100%;
-  overflow: auto;
+  height: auto; /* Remove fixed height */
+  flex: 1; /* Grow to fill space */
+  overflow-y: auto; /* Internal scrollbar */
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 20px;
 }
 
 #pdf-viewer-canvas {

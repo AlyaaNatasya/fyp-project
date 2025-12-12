@@ -408,7 +408,6 @@ button, input, select, textarea {
   color: var(--text-dark);
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
   /* Removed margin to allow it to take full parent space */
   /* If placed directly inside a flex item, this helps it expand */
   flex-grow: 1; 
