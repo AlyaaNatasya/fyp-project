@@ -127,12 +127,12 @@ function setupReminderModal() {
       date: dateForBackend, // Send as ISO string to backend
     };
 
-    let apiUrl = "http://localhost:5001/api/reminders";
+    let apiUrl = `${CONFIG.BACKEND_URL}/api/reminders`;
     let method = "POST";
 
     if (window.editingReminder) {
       // Update existing reminder
-      apiUrl = `http://localhost:5001/api/reminders/${window.editingReminder.id}`;
+      apiUrl = `${CONFIG.BACKEND_URL}/api/reminders/${window.editingReminder.id}`;
       method = "PUT";
     }
 
@@ -242,7 +242,7 @@ function loadReminders() {
     return;
   }
 
-  fetch("http://localhost:5001/api/reminders", {
+  fetch(`${CONFIG.BACKEND_URL}/api/reminders`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -332,7 +332,7 @@ function deleteReminder(id) {
   }
 
   if (confirm("Are you sure you want to delete this reminder?")) {
-    fetch(`http://localhost:5001/api/reminders/${id}`, {
+    fetch(`${CONFIG.BACKEND_URL}/api/reminders/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`,

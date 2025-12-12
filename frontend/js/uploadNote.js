@@ -46,7 +46,7 @@ function initUploadNotePage() {
   const fileInput = document.getElementById("file-input");
   const chooseFileBtn = document.querySelector(".choose-file-btn");
   const generateBtn = document.querySelector(".generate-btn");
-  const backendUrl = "http://localhost:5001"; // Node.js server URL
+  const backendUrl = window.CONFIG.BACKEND_URL; // Use centralized config
 
   // Safety check
   if (!fileInput || !chooseFileBtn || !generateBtn) {
@@ -85,7 +85,9 @@ function initUploadNotePage() {
     }
   };
 
-  const generateBtnListener = async () => {
+  const generateBtnListener = async (e) => {
+    if (e) e.preventDefault();
+    
     if (!fileInput.files.length) {
       alert("Please select a file first.");
       return;
@@ -103,81 +105,66 @@ function initUploadNotePage() {
     formData.append("file", selectedFile);
 
     try {
-      console.log("Making request to:", `${backendUrl}/api/ai/summarize`);
-      console.log("Token exists:", !!localStorage.getItem("token"));
-      console.log(
-        "Token:",
-        localStorage.getItem("token")?.substring(0, 20) + "..."
-      );
+      // Retry mechanism for network requests
+      const maxRetries = 3;
+      let lastError = null;
+      let response;
+      let data;
 
-      // Create an AbortController with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 300 second timeout (5 minutes) to accommodate AI processing
-
-      const response = await fetch(`${backendUrl}/api/ai/summarize`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          // Don't set Content-Type when using FormData - browser sets it automatically
-        },
-        body: formData,
-        signal: controller.signal, // Add the abort signal
-      });
-
-      clearTimeout(timeoutId); // Clear timeout if request completes
-
-      console.log("Response received - Status:", response.status);
-      console.log("Response headers:", [...response.headers.entries()]);
-
-      // Check if the response is ok before parsing JSON
-      if (!response.ok) {
-        let errorMessage = `HTTP error! status: ${response.status}`;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          // Attempt to get error details from response
-          const errorText = await response.text();
-          console.error("Error response text:", errorText);
-          try {
-            const errorJson = JSON.parse(errorText);
-            errorMessage = errorJson.message || errorMessage;
-          } catch (parseError) {
-            // If response is not JSON, use the text directly
-            console.error(
-              "Could not parse error response as JSON:",
-              parseError
-            );
-            errorMessage = errorText || errorMessage;
+          // Create an AbortController with timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 300000); // 300 second timeout (5 minutes)
+
+          response = await fetch(`${backendUrl}/api/ai/summarize`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: formData,
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            try {
+              const errorText = await response.text();
+              try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorMessage;
+              } catch (e) {
+                errorMessage = errorText || errorMessage;
+              }
+            } catch (e) {
+              // Ignore reading error
+            }
+            throw new Error(errorMessage);
           }
-        } catch (readError) {
-          console.error("Could not read error response:", readError);
+
+          // Check content type before parsing
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Response is not in JSON format");
+          }
+
+          data = await response.json();
+
+          // Success - exit the retry loop
+          lastError = null;
+          break;
+        } catch (error) {
+          lastError = error;
+          if (attempt === maxRetries) {
+            throw error;
+          } else {
+            const delay = Math.pow(2, attempt) * 1000;
+            console.warn(`Upload attempt ${attempt} failed, retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
         }
-        throw new Error(errorMessage);
-      }
-
-      // Check content type before parsing
-      const contentType = response.headers.get("content-type");
-      console.log("Response content type:", contentType);
-      if (!contentType || !contentType.includes("application/json")) {
-        const responseText = await response.text();
-        console.error(
-          "Response is not JSON. Content-Type:",
-          contentType,
-          "Response text:",
-          responseText
-        );
-        throw new Error(
-          "Response is not in JSON format: " + responseText.substring(0, 200)
-        );
-      }
-
-      // Get the JSON response, even for errors
-      const data = await response.json();
-      console.log("Response received:", data);
-
-      if (!response.ok) {
-        // Handle errors from the *initial* request (e.g., 400, 500)
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`
-        );
       }
 
       // --- SUCCESS (Expect 202 Accepted) ---
@@ -191,7 +178,9 @@ function initUploadNotePage() {
         );
 
         // Redirect to summary page, which will now handle polling
-        window.location.href = `../pages/summary.html?summaryId=${data.summaryId}`;
+        const redirectUrl = `summary.html?summaryId=${data.summaryId}`;
+        console.log("Redirecting to:", redirectUrl);
+        window.location.href = redirectUrl;
       } else {
         // Handle unexpected success response
         console.error("Invalid response format:", data);
@@ -208,7 +197,11 @@ function initUploadNotePage() {
       if (error.name === "AbortError") {
         alert("Request timeout: The server did not accept the file in time.");
       } else if (error.name === "TypeError" && error.message.includes("fetch")) {
-        alert(`Network error: ${error.message}. Please check if the backend server is running.`);
+        if (maxRetries > 1) {
+          alert(`Network error after ${maxRetries} attempts: ${error.message}. Please check if the backend server is running.`);
+        } else {
+          alert(`Network error: ${error.message}. Please check if the backend server is running.`);
+        }
       } else {
         alert(`Error: ${error.message}`);
       }

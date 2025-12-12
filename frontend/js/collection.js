@@ -62,7 +62,7 @@ async function loadCollection() {
       '<div class="loading-spinner">Loading collections...</div>';
 
     // Fetch collections from the backend API
-    const response = await fetch("http://localhost:5001/api/collections", {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -90,7 +90,7 @@ async function loadCollection() {
       let summaries = [];
       try {
         const collectionResponse = await fetch(
-          `http://localhost:5001/api/collections/${collection.id}/summaries`,
+          `${CONFIG.BACKEND_URL}/api/collections/${collection.id}/summaries`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -194,7 +194,7 @@ async function removeSummaryFromCollection(
   try {
     // Call the API to remove the summary from the collection
     const response = await fetch(
-      `http://localhost:5001/api/collections/${collectionId}/summaries/${summaryId}`,
+      `${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries/${summaryId}`,
       {
         method: "DELETE",
         headers: {
@@ -254,7 +254,7 @@ async function deleteCollection(collectionId, collectionElement) {
   try {
     // Call the API to delete the collection
     const response = await fetch(
-      `http://localhost:5001/api/collections/${collectionId}`,
+      `${CONFIG.BACKEND_URL}/api/collections/${collectionId}`,
       {
         method: "DELETE",
         headers: {

@@ -76,7 +76,7 @@ async function loadCollectionDetail(collectionId) {
 
   try {
     // Fetch collection details
-    const collectionResponse = await fetch(`http://localhost:5001/api/collections/${collectionId}`, {
+    const collectionResponse = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -90,7 +90,7 @@ async function loadCollectionDetail(collectionId) {
     collectionNameElement.textContent = collection.name;
 
     // Fetch summaries in this collection
-    const summariesResponse = await fetch(`http://localhost:5001/api/collections/${collectionId}/summaries`, {
+    const summariesResponse = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -162,7 +162,7 @@ async function removeSummaryFromCollection(collectionId, summaryId, summaryCard)
 
   try {
     // Call the API to remove the summary from the collection
-    const response = await fetch(`http://localhost:5001/api/collections/${collectionId}/summaries/${summaryId}`, {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries/${summaryId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

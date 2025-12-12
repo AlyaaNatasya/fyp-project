@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const path = require("path"); // Added this line
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -28,7 +29,8 @@ const corsOptions = {
       origin === "http://localhost:8080" ||
       origin === "http://localhost:8000" ||
       origin === "http://127.0.0.1:3000" ||
-      origin.startsWith("http://localhost:")
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:")
     ) {
       return callback(null, true);
     }
@@ -44,16 +46,33 @@ const corsOptions = {
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Origin",
+    "X-Requested-With",
+    "Content-Type",
+    "Accept",
+    "Authorization",
+    "X-Requested-With",
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
   optionsSuccessStatus: 200,
   preflightContinue: false,
 };
 
-// Security headers - with a specific configuration for Cross-Origin-Resource-Policy
+// Security headers - with a specific configuration for Cross-Origin-Resource-Policy and Content Security Policy
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+        workerSrc: ["'self'", "blob:"], // Allow web workers from same origin and blob URLs for PDF.js
+        imgSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, and cdnjs
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"], // Allow inline styles, cdnjs, and Google Fonts
+        fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"], // Allow fonts from same origin, cdnjs, and Google Fonts
+      },
+    },
   })
 );
 app.use(cors(corsOptions)); // Enable CORS with options
@@ -66,8 +85,12 @@ app.use("/api/reminders", reminderRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/collections", collectionRoutes);
 
-// Test route
-app.get("/", (req, res) => {
+// Serve static files from the 'frontend' directory
+// This should come after API routes but before any catch-all routes
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// Test route - Keep for direct access to check server status
+app.get("/api", (req, res) => {
   res.send(`
     <h1>StudyBloom Backend</h1>
     <p>✅ Server is running!</p>
@@ -81,10 +104,54 @@ app.get("/", (req, res) => {
   `);
 });
 
+// Increase server timeout values to handle long-running AI processing
+app.set("trust proxy", true); // Trust proxy if behind nginx/load balancer
+
 // Start server with increased timeout (5 minutes) to handle long AI processing
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+const server = app.listen(PORT, "127.0.0.1", () => {
+  console.log(`🚀 Server running at http://127.0.0.1:${PORT}`);
+  console.log("Open your frontend at http://127.0.0.1:5001/pages/home.html");
 });
 
-// Set timeout to 5 minutes (300000 ms) to handle long AI processing
-server.timeout = 300000;
+// Set timeout values to handle long-running requests
+server.setTimeout(300000); // 5 minutes for request processing
+server.keepAliveTimeout = 310000; // Slightly longer than request timeout
+server.headersTimeout = 320000; // Slightly longer than keep-alive timeout
+
+// Handle server errors gracefully
+server.on("error", (error) => {
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  const bind = typeof PORT === "string" ? "Pipe " + PORT : "Port " + PORT;
+
+  // Handle specific listen errors
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
+// Graceful shutdown handling
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully");
+  server.close(() => {
+    console.log("Process terminated");
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down gracefully");
+  server.close(() => {
+    console.log("Process terminated");
+  });
+});

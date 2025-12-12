@@ -248,7 +248,7 @@ function showCreateCollectionModal() {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/api/collections", {
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

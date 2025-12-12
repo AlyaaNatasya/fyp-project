@@ -27,9 +27,12 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // Create unique filename to avoid conflicts
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  }
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
 });
 
 // File filter to only allow specific file types
@@ -63,7 +66,7 @@ const upload = multer({
 async function extractTextFromPDF(filePath) {
   try {
     // Read the file from disk as a buffer
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.promises.readFile(filePath);
     const data = await pdfParse(fileBuffer);
     return data.text;
   } catch (error) {
@@ -75,7 +78,7 @@ async function extractTextFromPDF(filePath) {
 async function extractTextFromDOCX(filePath) {
   try {
     // Read the file from disk as a buffer
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.promises.readFile(filePath);
     const result = await mammoth.extractRawText({ buffer: fileBuffer });
     return result.value;
   } catch (error) {
@@ -87,7 +90,7 @@ async function extractTextFromDOCX(filePath) {
 async function extractTextFromTXT(filePath) {
   try {
     // Read the file from disk as a buffer
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.promises.readFile(filePath);
     return fileBuffer.toString("utf8");
   } catch (error) {
     throw new Error(`Error reading TXT file: ${error.message}`);
@@ -116,36 +119,40 @@ const generateSummaryFromUpload = async (req, res) => {
     connection.release(); // Release connection
 
     // 2. Respond IMMEDIATELY to the client with 202 Accepted
+    // Log before sending response for debugging
+    console.log(
+      `Sending response for summary ${summaryId}, processing to continue in background.`
+    );
+
+    // Store the file path and name locally to avoid req context issues in async processing
+    const filePath = req.file.path;
+    const fileName = req.file.originalname;
+
     res.status(202).json({
       message: "File accepted for processing.",
       summaryId: summaryId,
-      fileName: req.file.originalname,
+      fileName: fileName,
     });
 
-    console.log(
-      `Summary ${summaryId} record created with status 'processing'.`
-    );
-
-    // 3. Start the long-running task *after* responding
-    // We wrap this in a self-executing async function
-    // to handle its own errors and DB updates.
-    (async () => {
+    // Use a longer timeout to ensure HTTP response is fully flushed before background processing
+    // This prevents interference between the response and background AI processing
+    setTimeout(async () => {
       let processingConnection;
       try {
         processingConnection = await pool.getConnection();
 
         // 3a. Extract Text (Same as your original code)
-        const fileExtension = path.extname(req.file.originalname).toLowerCase();
+        const fileExtension = path.extname(fileName).toLowerCase();
         let extractedText = "";
         switch (fileExtension) {
           case ".pdf":
-            extractedText = await extractTextFromPDF(req.file.path);
+            extractedText = await extractTextFromPDF(filePath);
             break;
           case ".docx":
-            extractedText = await extractTextFromDOCX(req.file.path);
+            extractedText = await extractTextFromDOCX(filePath);
             break;
           case ".txt":
-            extractedText = await extractTextFromTXT(req.file.path);
+            extractedText = await extractTextFromTXT(filePath);
             break;
           default:
             throw new Error(`Unsupported file type: ${fileExtension}`);
@@ -183,21 +190,37 @@ const generateSummaryFromUpload = async (req, res) => {
 
         // 3e. Move the original file to preserved directory and update the record in DB with 'completed'
         const contentPreview = extractedText.substring(0, 1000);
-        
+
         // Move the uploaded file to the preserved directory
-        const originalFileName = path.basename(req.file.path);
-        const preservedFilePath = path.join(preservedFilesDir, originalFileName);
-        
-        // Since we're using multer's disk storage, the file is already on disk
-        // We can move it to the preserved directory for long-term storage
-        fs.renameSync(req.file.path, preservedFilePath);
-        
-        // Update the record in the database with the new path
-        await processingConnection.execute(
-          "UPDATE summaries SET summary_text = ?, original_content_preview = ?, file_path = ?, status = ? WHERE id = ?",
-          [summary, contentPreview, preservedFilePath, "completed", summaryId]
+        const originalFileName = path.basename(filePath);
+        const preservedFilePath = path.join(
+          preservedFilesDir,
+          originalFileName
         );
-        console.log(`Summary ${summaryId} completed and saved.`);
+
+        // Check if the file still exists before moving it
+        if (fs.existsSync(filePath)) {
+          // Since we're using multer's disk storage, the file is already on disk
+          // We can move it to the preserved directory for long-term storage
+          fs.renameSync(filePath, preservedFilePath);
+
+          // Update the record in the database with the new path
+          await processingConnection.execute(
+            "UPDATE summaries SET summary_text = ?, original_content_preview = ?, file_path = ?, status = ? WHERE id = ?",
+            [summary, contentPreview, preservedFilePath, "completed", summaryId]
+          );
+          console.log(`Summary ${summaryId} completed and saved.`);
+        } else {
+          // File was already moved or deleted, update DB without moving file
+          // The file path in DB remains the original path since we can't move what doesn't exist
+          await processingConnection.execute(
+            "UPDATE summaries SET summary_text = ?, original_content_preview = ?, status = ? WHERE id = ?",
+            [summary, contentPreview, "completed", summaryId]
+          );
+          console.log(
+            `Summary ${summaryId} completed (file already processed or moved).`
+          );
+        }
       } catch (processingError) {
         console.error(
           `Error processing summary ${summaryId}:`,
@@ -210,22 +233,29 @@ const generateSummaryFromUpload = async (req, res) => {
             ["failed", processingError.message, summaryId]
           );
         }
-        
+
         // Clean up the temporary uploaded file if processing failed
         try {
-          if (req.file && req.file.path && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path); // Delete the uploaded file
-            console.log(`Cleaned up failed upload file: ${req.file.path}`);
+          if (filePath && fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath); // Delete the uploaded file
+            console.log(`Cleaned up failed upload file: ${filePath}`);
           }
         } catch (cleanupError) {
-          console.error("Error cleaning up failed upload file:", cleanupError.message);
+          console.error(
+            "Error cleaning up failed upload file:",
+            cleanupError.message
+          );
         }
       } finally {
         if (processingConnection) {
           processingConnection.release();
         }
       }
-    })(); // <-- Immediately invoke the async function
+    }, 500); // 500ms delay to ensure response is properly flushed and prevent HTTP interference
+
+    console.log(
+      `Summary ${summaryId} record created with status 'processing'.`
+    );
   } catch (error) {
     console.error("Full error object:", error);
     console.error("Error name:", error.name);
@@ -369,29 +399,32 @@ const getOriginalFile = async (req, res) => {
 
     // Check if file exists
     if (!fs.existsSync(summary.file_path)) {
-      return res.status(404).json({ message: "Original file not found on disk" });
+      return res
+        .status(404)
+        .json({ message: "Original file not found on disk" });
     }
 
     // Read and send the file
     const fileBuffer = fs.readFileSync(summary.file_path);
-    
+
     // Set appropriate content type based on file extension
     const fileExtension = path.extname(summary.original_filename).toLowerCase();
-    let contentType = 'application/octet-stream'; // Default
-    
+    let contentType = "application/octet-stream"; // Default
+
     switch (fileExtension) {
-      case '.pdf':
-        contentType = 'application/pdf';
+      case ".pdf":
+        contentType = "application/pdf";
         break;
-      case '.docx':
-        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case ".docx":
+        contentType =
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         break;
-      case '.txt':
-        contentType = 'text/plain';
+      case ".txt":
+        contentType = "text/plain";
         break;
     }
-    
-    res.setHeader('Content-Type', contentType);
+
+    res.setHeader("Content-Type", contentType);
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="${summary.original_filename}"`
@@ -418,7 +451,7 @@ const saveSummaryToCollection = async (req, res) => {
     }
 
     const connection = await pool.getConnection();
-    
+
     // Verify that both the collection and summary belong to the user
     const [collectionCheck] = await connection.execute(
       "SELECT id FROM collections WHERE id = ? AND user_id = ?",
@@ -449,7 +482,7 @@ const saveSummaryToCollection = async (req, res) => {
       "INSERT IGNORE INTO collection_items (collection_id, summary_id) VALUES (?, ?)",
       [collectionId, summaryId]
     );
-    
+
     connection.release();
 
     res.status(200).json({

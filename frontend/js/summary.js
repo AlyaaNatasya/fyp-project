@@ -180,7 +180,7 @@ function initSummaryPage() {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/ai/summaries/${summaryId}`,
+        `${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -286,7 +286,7 @@ function initSummaryPage() {
 
         // Display the original content preview with a download link
         actualNotes.innerHTML = `<strong>Uploaded File:</strong> ${data.original_filename}<br>
-          <a href="http://localhost:5001/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 5px;">
+          <a href="${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 5px;">
             <i class="fas fa-download"></i> Download Original File
           </a><br><br>`;
 
@@ -303,7 +303,7 @@ function initSummaryPage() {
 
           // Load and display the PDF
           loadAndDisplayPDF(
-            `http://localhost:5001/api/ai/summaries/${summaryId}/file`,
+            `${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file`,
             data.original_filename
           );
         } else {
@@ -382,7 +382,7 @@ function initSummaryPage() {
         error
       );
       summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Error loading summary after ${maxRetries} attempts: ${error.message}</span></div>`;
-      actualNotes.innerHTML = `<div class="error-container"><p style="color: red;">Could not load original content. <a href="http://localhost:5001/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff;">Download Original File (if available)</a></p></div>`;
+      actualNotes.innerHTML = `<div class="error-container"><p style="color: red;">Could not load original content. <a href="${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff;">Download Original File (if available)</a></p></div>`;
       isCurrentlyPolling = false; // Reset polling flag on final failure
     }
   }
@@ -452,7 +452,7 @@ function initSummaryPage() {
     return new Promise(async (resolve, reject) => {
       try {
         // Check if user has any collections
-        const response = await fetch("http://localhost:5001/api/collections", {
+        const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -728,7 +728,7 @@ function initSummaryPage() {
 
       // Save to the selected collection
       const saveResponse = await fetch(
-        "http://localhost:5001/api/ai/summaries/" +
+        `${CONFIG.BACKEND_URL}/api/ai/summaries/` +
           summaryId +
           "/save-to-collection",
         {
