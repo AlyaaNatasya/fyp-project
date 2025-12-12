@@ -6,7 +6,7 @@ const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const pool = require("../config/db");
 
-const { generateSummary } = require("../services/aiService");
+const { generateSummary, generateMindMap } = require("../services/aiService");
 
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, "../uploads");
@@ -496,11 +496,57 @@ const saveSummaryToCollection = async (req, res) => {
   }
 };
 
+// Generate mind map from summary text
+const generateMindMapFromText = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Text content is required",
+      });
+    }
+
+    // Limit text length to prevent API issues
+    const maxLength = 8000;
+    let processedText = text;
+    if (processedText.length > maxLength) {
+      let truncatedText = processedText.substring(0, maxLength);
+      const sentenceEndings = [
+        truncatedText.lastIndexOf("."),
+        truncatedText.lastIndexOf("!"),
+        truncatedText.lastIndexOf("?"),
+      ];
+      const lastEnding = Math.max(...sentenceEndings);
+      if (lastEnding > maxLength * 0.7) {
+        truncatedText = truncatedText.substring(0, lastEnding + 1);
+      }
+      processedText = truncatedText;
+    }
+
+    // Generate the mind map using the AI service
+    const mindMap = await generateMindMap(processedText);
+
+    res.status(200).json({
+      success: true,
+      mindMap: mindMap,
+    });
+  } catch (error) {
+    console.error("Error generating mind map:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to generate mind map",
+    });
+  }
+};
+
 module.exports = {
   generateSummaryFromUpload,
   getSummaryById,
   getUserSummaries,
   getOriginalFile,
   saveSummaryToCollection,
+  generateMindMapFromText, // Export the new mind map function
   upload, // Export multer instance for use in routes
 };

@@ -57,7 +57,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://d3js.org"],
         workerSrc: ["'self'", "blob:"], // Allow web workers from same origin and blob URLs for PDF.js
         imgSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, and cdnjs
         styleSrc: [

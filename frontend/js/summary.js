@@ -471,18 +471,11 @@ function initSummaryPage() {
             <div class="collection-modal">
               <h3>Select Collection to Save Summary</h3>
               <div class="collection-list">
-                ${
-                  collections.length === 0
-                    ? "<p>You don't have any collections yet. Create one first:</p>"
-                    : "<p>Choose which collection to save your summary to:</p>"
-                }
+                <p>Choose which collection to save your summary to:</p>
               </div>
               <div class="modal-actions">
-                ${
-                  collections.length === 0
-                    ? '<button id="modal-create-collection" class="btn-primary">Create Collection</button>'
-                    : '<button id="modal-confirm" class="btn-primary" disabled>Save to Collection</button>'
-                }
+                <button id="modal-new-collection" class="btn-tertiary">New Collection Folder</button>
+                <button id="modal-confirm" class="btn-primary" disabled>Save to Collection</button>
                 <button id="modal-cancel" class="btn-secondary">Cancel</button>
               </div>
             </div>
@@ -600,17 +593,31 @@ function initSummaryPage() {
           .btn-secondary:hover {
             background: #f3f4f6;
           }
+          .btn-tertiary {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+          .btn-tertiary:hover {
+            background: #eff6ff;
+          }
         `;
         document.head.appendChild(style);
 
         // Add modal to body
         document.body.appendChild(modal);
 
+        // Add collection options
+        const collectionList = modal.querySelector(".collection-list");
+
         if (collections.length > 0) {
-          // Add collection options
-          const collectionList = modal.querySelector(".collection-list");
-          collectionList.innerHTML = `
-            <p>Choose which collection to save your summary to:</p>
+          collectionList.innerHTML += `
             ${collections
               .map(
                 (collection) => `
@@ -629,46 +636,189 @@ function initSummaryPage() {
               )
               .join("")}
           `;
+        } else {
+          collectionList.innerHTML += '<p class="no-collections-message">You don\'t have any collections yet.</p>';
+        }
 
-          // Handle collection selection
-          modal.querySelectorAll(".collection-option").forEach((option) => {
-            option.addEventListener("click", () => {
-              modal
-                .querySelectorAll(".collection-option")
-                .forEach((opt) => opt.classList.remove("selected"));
-              option.classList.add("selected");
-              const radio = option.querySelector('input[type="radio"]');
-              radio.checked = true;
-              modal.querySelector("#modal-confirm").disabled = false;
-            });
+        // Handle collection selection
+        modal.querySelectorAll(".collection-option").forEach((option) => {
+          option.addEventListener("click", () => {
+            modal
+              .querySelectorAll(".collection-option")
+              .forEach((opt) => opt.classList.remove("selected"));
+            option.classList.add("selected");
+            const radio = option.querySelector('input[type="radio"]');
+            radio.checked = true;
+            modal.querySelector("#modal-confirm").disabled = false;
+          });
+        });
+
+        // Handle save
+        modal
+          .querySelector("#modal-confirm")
+          .addEventListener("click", () => {
+            const selectedRadio = modal.querySelector(
+              'input[name="selected-collection"]:checked'
+            );
+            if (!selectedRadio) {
+              alert("Please select a collection first.");
+              return;
+            }
+            const selectedCollectionId = selectedRadio.value;
+            document.body.removeChild(modal);
+            style.remove();
+            resolve(selectedCollectionId);
           });
 
-          // Handle save
-          modal
-            .querySelector("#modal-confirm")
-            .addEventListener("click", () => {
-              const selectedRadio = modal.querySelector(
-                'input[name="selected-collection"]:checked'
-              );
-              if (!selectedRadio) {
-                alert("Please select a collection first.");
+        // Handle new collection creation
+        modal
+          .querySelector("#modal-new-collection")
+          .addEventListener("click", async () => {
+            // Create new collection input modal
+            const newCollectionModal = document.createElement("div");
+            newCollectionModal.innerHTML = `
+              <div class="new-collection-modal-overlay">
+                <div class="new-collection-modal">
+                  <h3>Create New Collection</h3>
+                  <div class="input-group">
+                    <label for="collection-name">Collection Name</label>
+                    <input type="text" id="collection-name" placeholder="Enter collection name" required>
+                  </div>
+                  <div class="input-group">
+                    <label for="collection-description">Description (optional)</label>
+                    <textarea id="collection-description" placeholder="Enter collection description"></textarea>
+                  </div>
+                  <div class="modal-actions">
+                    <button id="create-collection-btn" class="btn-primary">Create Collection</button>
+                    <button id="cancel-create-collection-btn" class="btn-secondary">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            `;
+
+            // Add new collection modal styles
+            const newCollectionStyle = document.createElement("style");
+            newCollectionStyle.textContent = `
+              .new-collection-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1001;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              }
+              .new-collection-modal {
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                max-width: 450px;
+                width: 90%;
+              }
+              .new-collection-modal h3 {
+                margin-top: 0;
+                margin-bottom: 16px;
+                color: #1f2937;
+                font-size: 18px;
+                font-weight: 600;
+              }
+              .input-group {
+                margin-bottom: 16px;
+              }
+              .input-group label {
+                display: block;
+                margin-bottom: 4px;
+                color: #374151;
+                font-weight: 500;
+              }
+              .input-group input, .input-group textarea {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                font-size: 14px;
+                font-family: inherit;
+              }
+              .input-group textarea {
+                min-height: 80px;
+                resize: vertical;
+              }
+              .modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                margin-top: 16px;
+              }
+            `;
+            document.head.appendChild(newCollectionStyle);
+
+            // Add new collection modal to body
+            document.body.appendChild(newCollectionModal);
+
+            // Focus on the input field
+            const collectionNameInput = newCollectionModal.querySelector('#collection-name');
+            collectionNameInput.focus();
+
+            // Handle create collection
+            newCollectionModal.querySelector('#create-collection-btn').addEventListener('click', async () => {
+              const name = newCollectionModal.querySelector('#collection-name').value.trim();
+              const description = newCollectionModal.querySelector('#collection-description').value.trim();
+
+              if (!name) {
+                alert("Please enter a collection name.");
                 return;
               }
-              const selectedCollectionId = selectedRadio.value;
-              document.body.removeChild(modal);
-              style.remove();
-              resolve(selectedCollectionId);
+
+              try {
+                const createResponse = await fetch(`${CONFIG.BACKEND_URL}/api/collections`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({ name, description }),
+                });
+
+                if (!createResponse.ok) {
+                  const errorData = await createResponse.json();
+                  throw new Error(errorData.message || "Failed to create collection");
+                }
+
+                const result = await createResponse.json();
+                document.body.removeChild(newCollectionModal);
+                newCollectionStyle.remove();
+
+                // Close the main collection selection modal and return the new collection ID
+                document.body.removeChild(modal);
+                style.remove();
+                resolve(result.id);
+              } catch (error) {
+                console.error("Error creating collection:", error);
+                alert("Error creating collection: " + error.message);
+              }
             });
-        } else {
-          // Handle create collection
-          modal
-            .querySelector("#modal-create-collection")
-            .addEventListener("click", () => {
-              document.body.removeChild(modal);
-              style.remove();
-              reject("create_new");
+
+            // Handle cancel for new collection
+            newCollectionModal.querySelector('#cancel-create-collection-btn').addEventListener('click', () => {
+              document.body.removeChild(newCollectionModal);
+              newCollectionStyle.remove();
             });
-        }
+
+            // Close new collection modal when clicking overlay
+            newCollectionModal
+              .querySelector(".new-collection-modal-overlay")
+              .addEventListener("click", (e) => {
+                if (e.target === newCollectionModal.querySelector(".new-collection-modal-overlay")) {
+                  document.body.removeChild(newCollectionModal);
+                  newCollectionStyle.remove();
+                }
+              });
+          });
 
         // Handle cancel
         modal.querySelector("#modal-cancel").addEventListener("click", () => {

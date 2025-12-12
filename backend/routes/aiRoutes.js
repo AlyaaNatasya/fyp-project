@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/authMiddleware');
-const { upload, generateSummaryFromUpload, getSummaryById, getUserSummaries, getOriginalFile, saveSummaryToCollection } = require('../controllers/aiController');
+const { upload, generateSummaryFromUpload, getSummaryById, getUserSummaries, getOriginalFile, saveSummaryToCollection, generateMindMapFromText } = require('../controllers/aiController');
 
 // Route to generate summary from uploaded file
 // POST /api/ai/summarize
@@ -23,5 +23,9 @@ router.get('/summaries/:id/file', authenticateToken, getOriginalFile);
 // Route to save a summary to a collection
 // POST /api/ai/summaries/:id/save-to-collection
 router.post('/summaries/:id/save-to-collection', authenticateToken, saveSummaryToCollection);
+
+// Route to generate mind map from text
+// POST /api/ai/mindmap
+router.post('/mindmap', authenticateToken, generateMindMapFromText);
 
 module.exports = router;

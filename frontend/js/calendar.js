@@ -233,16 +233,19 @@ function formatDateFromString(dateString) {
   return `${weekdays[weekdayIndex]}, ${months[month - 1]} ${day}, ${year}`;
 }
 
-// --- Reminder Logic ---
-function loadReminders() {
-  // Fetch reminders from the API
+// Function to remove expired reminders (reminders with dates before current date)
+function removeExpiredReminders() {
   const token = localStorage.getItem("token");
   if (!token) {
     console.error("No authentication token found");
     return;
   }
 
-  fetch(`${CONFIG.BACKEND_URL}/api/reminders`, {
+  // Get current date in YYYY-MM-DD format (without time component)
+  const today = new Date();
+  const currentDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  return fetch(`${CONFIG.BACKEND_URL}/api/reminders`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -252,75 +255,243 @@ function loadReminders() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      reminders = data.reminders || [];
-      const reminderList = document.getElementById("reminder-list");
-      if (!reminderList) return;
+      const expiredReminders = [];
 
-      reminderList.innerHTML = "";
+      // Find reminders with dates before current date
+      data.reminders.forEach(reminder => {
+        // Extract just the date part from the reminder date string
+        const reminderDateStr = reminder.date.split(' ')[0];
 
-      // Sort reminders by date string (YYYY-MM-DD format sorts correctly alphabetically)
-      const sorted = reminders
-        .map((r) => {
-          // Extract only the date part (YYYY-MM-DD) in case there's time info
-          const datePart = r.date.split(' ')[0];
-          // Create date object for display purposes only
-          const [yearStr, monthStr, dayStr] = datePart.split('-');
-          const year = parseInt(yearStr);
-          const month = parseInt(monthStr) - 1; // Month is 0-indexed
-          const day = parseInt(dayStr);
-          const dateObj = new Date(year, month, day, 12, 0, 0); // Use noon to avoid DST issues
-          return { ...r, dateObj, dateStr: datePart };
-        })
-        .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
-
-      sorted.forEach((reminder) => {
-        const card = document.createElement("div");
-        card.classList.add("reminder-card");
-        card.dataset.id = reminder.id;
-
-        const categoryLabel = reminder.category
-          ? `<span class="category">${reminder.category}</span>`
-          : "";
-
-        card.innerHTML = `
-          <i class="fas fa-bell"></i>
-          <div class="reminder-info">
-            <strong>${reminder.title}</strong>
-            <small>${formatDateFromString(reminder.date)}</small>
-            ${categoryLabel}
-          </div>
-          <div class="reminder-actions">
-            <button class="btn-icon edit-btn" title="Edit Reminder">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
-            <button class="btn-icon delete-btn" title="Delete Reminder">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </div>
-        `;
-
-        // Edit reminder
-        card.querySelector(".edit-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          editReminder(reminder);
-        });
-
-        // Delete reminder
-        card.querySelector(".delete-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          deleteReminder(reminder.id);
-        });
-
-        card.addEventListener("dblclick", () => editReminder(reminder));
-        reminderList.appendChild(card);
+        // Compare dates as strings in YYYY-MM-DD format
+        if (reminderDateStr < currentDateStr) {
+          expiredReminders.push(reminder.id);
+        }
       });
+
+      // Delete all expired reminders
+      if (expiredReminders.length > 0) {
+        console.log(`Found ${expiredReminders.length} expired reminders to remove`);
+
+        // Create promises for all delete operations
+        const deletePromises = expiredReminders.map(id => {
+          return fetch(`${CONFIG.BACKEND_URL}/api/reminders/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }).then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              console.log(`Deleted expired reminder ID: ${id}`);
+            } else {
+              console.error(`Failed to delete expired reminder ID: ${id}`, result.message);
+            }
+          })
+          .catch(error => {
+            console.error(`Error deleting expired reminder ID: ${id}`, error);
+          });
+        });
+
+        // Wait for all delete operations to complete
+        return Promise.all(deletePromises);
+      } else {
+        console.log("No expired reminders found");
+        return Promise.resolve();
+      }
     } else {
-      console.error("Failed to load reminders:", data.message);
+      console.error("Failed to fetch reminders for expiration check:", data.message);
+      return Promise.reject(new Error(data.message || "Failed to fetch reminders"));
     }
   })
   .catch(error => {
-    console.error("Error fetching reminders:", error);
+    console.error("Error checking for expired reminders:", error);
+    return Promise.reject(error);
   });
+}
+
+// --- Reminder Logic ---
+function loadReminders() {
+  // First, remove expired reminders
+  removeExpiredReminders()
+    .then(() => {
+      // Then fetch and load remaining reminders
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
+      fetch(`${CONFIG.BACKEND_URL}/api/reminders`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          reminders = data.reminders || [];
+          const reminderList = document.getElementById("reminder-list");
+          if (!reminderList) return;
+
+          reminderList.innerHTML = "";
+
+          // Sort reminders by date string (YYYY-MM-DD format sorts correctly alphabetically)
+          const sorted = reminders
+            .map((r) => {
+              // Extract only the date part (YYYY-MM-DD) in case there's time info
+              const datePart = r.date.split(' ')[0];
+              // Create date object for display purposes only
+              const [yearStr, monthStr, dayStr] = datePart.split('-');
+              const year = parseInt(yearStr);
+              const month = parseInt(monthStr) - 1; // Month is 0-indexed
+              const day = parseInt(dayStr);
+              const dateObj = new Date(year, month, day, 12, 0, 0); // Use noon to avoid DST issues
+              return { ...r, dateObj, dateStr: datePart };
+            })
+            .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+          sorted.forEach((reminder) => {
+            const card = document.createElement("div");
+            card.classList.add("reminder-card");
+            card.dataset.id = reminder.id;
+
+            const categoryLabel = reminder.category
+              ? `<span class="category">${reminder.category}</span>`
+              : "";
+
+            card.innerHTML = `
+              <i class="fas fa-bell"></i>
+              <div class="reminder-info">
+                <strong>${reminder.title}</strong>
+                <small>${formatDateFromString(reminder.date)}</small>
+                ${categoryLabel}
+              </div>
+              <div class="reminder-actions">
+                <button class="btn-icon edit-btn" title="Edit Reminder">
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="btn-icon delete-btn" title="Delete Reminder">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            `;
+
+            // Edit reminder
+            card.querySelector(".edit-btn").addEventListener("click", (e) => {
+              e.stopPropagation();
+              editReminder(reminder);
+            });
+
+            // Delete reminder
+            card.querySelector(".delete-btn").addEventListener("click", (e) => {
+              e.stopPropagation();
+              deleteReminder(reminder.id);
+            });
+
+            card.addEventListener("dblclick", () => editReminder(reminder));
+            reminderList.appendChild(card);
+          });
+        } else {
+          console.error("Failed to load reminders:", data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching reminders:", error);
+      });
+    })
+    .catch(error => {
+      console.error("Error during reminder expiration cleanup:", error);
+
+      // Even if expiration cleanup fails, still load reminders
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
+      fetch(`${CONFIG.BACKEND_URL}/api/reminders`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          reminders = data.reminders || [];
+          const reminderList = document.getElementById("reminder-list");
+          if (!reminderList) return;
+
+          reminderList.innerHTML = "";
+
+          // Sort reminders by date string (YYYY-MM-DD format sorts correctly alphabetically)
+          const sorted = reminders
+            .map((r) => {
+              // Extract only the date part (YYYY-MM-DD) in case there's time info
+              const datePart = r.date.split(' ')[0];
+              // Create date object for display purposes only
+              const [yearStr, monthStr, dayStr] = datePart.split('-');
+              const year = parseInt(yearStr);
+              const month = parseInt(monthStr) - 1; // Month is 0-indexed
+              const day = parseInt(dayStr);
+              const dateObj = new Date(year, month, day, 12, 0, 0); // Use noon to avoid DST issues
+              return { ...r, dateObj, dateStr: datePart };
+            })
+            .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+          sorted.forEach((reminder) => {
+            const card = document.createElement("div");
+            card.classList.add("reminder-card");
+            card.dataset.id = reminder.id;
+
+            const categoryLabel = reminder.category
+              ? `<span class="category">${reminder.category}</span>`
+              : "";
+
+            card.innerHTML = `
+              <i class="fas fa-bell"></i>
+              <div class="reminder-info">
+                <strong>${reminder.title}</strong>
+                <small>${formatDateFromString(reminder.date)}</small>
+                ${categoryLabel}
+              </div>
+              <div class="reminder-actions">
+                <button class="btn-icon edit-btn" title="Edit Reminder">
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="btn-icon delete-btn" title="Delete Reminder">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            `;
+
+            // Edit reminder
+            card.querySelector(".edit-btn").addEventListener("click", (e) => {
+              e.stopPropagation();
+              editReminder(reminder);
+            });
+
+            // Delete reminder
+            card.querySelector(".delete-btn").addEventListener("click", (e) => {
+              e.stopPropagation();
+              deleteReminder(reminder.id);
+            });
+
+            card.addEventListener("dblclick", () => editReminder(reminder));
+            reminderList.appendChild(card);
+          });
+        } else {
+          console.error("Failed to load reminders:", data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching reminders:", error);
+      });
+    });
 }
 
 // Delete a reminder
