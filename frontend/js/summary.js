@@ -48,11 +48,24 @@ function initSummaryPage() {
     return;
   }
 
+  // Initialize marked.js - Using default configuration for maximum robustness
+  // The CSS in summary.css already targets standard tags (.summary-box h1, etc.)
+  // so we don't need custom classes.
+  marked.use({
+    gfm: true,         // GitHub Flavored Markdown
+    breaks: true,      // Enable line breaks for better AI text handling
+    pedantic: false,
+    sanitize: false    // We use DOMPurify later
+  });
+
   // Variables to track state and prevent multiple simultaneous polls
   let isCurrentlyPolling = false;
   let pollIntervalId = null;
   let maxPollAttempts = 120; // Maximum number of polling attempts (120 * 5s = 10 minutes)
   let currentPollAttempt = 0;
+
+  // Flag to ensure only one rendering happens at a time
+  let isRendering = false;
 
   // Clean up any existing polling when the page is unloaded or before new requests
   window.addEventListener("beforeunload", function () {
@@ -86,6 +99,43 @@ function initSummaryPage() {
     urlParams.get("summaryId") || localStorage.getItem("summaryId");
   const uploadedFileName = localStorage.getItem("uploadedFileName");
 
+  // Helper function to repair common markdown formatting issues
+  function formatMarkdown(text) {
+    if (!text) return "";
+
+    let formatted = text;
+
+    // 1. Force newlines before headers that are buried in text
+    // Matches: (not a newline)(optional space)(# symbols)(space)(text)
+    // We run this loop until no more changes are made to catch overlapping cases
+    let oldFormatted;
+    do {
+        oldFormatted = formatted;
+        formatted = formatted.replace(/([^\n])\s+(#{1,6})\s+/g, '$1\n\n$2 ');
+    } while (formatted !== oldFormatted);
+
+    // 2. Force newlines before list items that are buried in text
+    // Bullet points (* or -)
+    formatted = formatted.replace(/([^\n])\s+([*-])\s+/g, '$1\n\n$2 ');
+    // Numbered lists (1. 2. etc)
+    formatted = formatted.replace(/([^\n])\s+(\d+\.)\s+/g, '$1\n\n$2 ');
+
+    // 3. Fix potential issues with too many hash symbols for headers
+    formatted = formatted.replace(/(#{7,})\s+(.+)$/gm, "###### $2");
+
+    // 4. Clean up excessive newlines
+    formatted = formatted.replace(/\n{3,}/g, "\n\n");
+
+    // 5. Ensure a newline after "---" horizontal rule
+    formatted = formatted.replace(/---\s*([^\n])/g, '---\n\n$1');
+    formatted = formatted.replace(/---\s*$/g, '---\n\n');
+
+    // 6. Final cleanup: trim whitespace
+    formatted = formatted.trim();
+
+    return formatted;
+  }
+
   if (summaryId) {
     // Fetch the summary from the backend API
     fetchSummaryFromDatabase(summaryId);
@@ -110,186 +160,260 @@ function initSummaryPage() {
         Learning these skills opens many career opportunities.
       `;
 
-      // Generate summary
-      function generateSummary() {
-        const fakeSummary = `
-          Key Points:
-          • HTML is the structure of web pages.
-          • CSS controls the styling and layout.
-          • JavaScript adds dynamic behavior.
-          • React is a popular framework for building modern apps.
-          • These skills are essential for web development careers.
-        `;
-        summaryOutput.innerHTML = fakeSummary;
-      }
+        // Generate summary
+        function generateSummary() {
+          const fakeSummary = `# Introduction to Web Development
 
-      // Generate summary on load
-      generateSummary();
-    }
-  }
+### Key Points:
+*   HTML is the structure of web pages.
+*   CSS controls the styling and layout.
+*   JavaScript adds dynamic behavior.
+*   React is a popular framework for building modern apps.
+*   These skills are essential for web development careers.`;
 
-  // Function to fetch summary from database with retry logic for race condition
-  async function fetchSummaryFromDatabase(summaryId, retryCount = 0) {
-    const maxRetries = 5;
-    const baseDelay = 1000; // 1 second base delay
-
-    // Prevent multiple simultaneous polling requests
-    if (isCurrentlyPolling && retryCount === 0) {
-      // If we're already polling but need to start a new fetch (e.g., page reload),
-      // clean up the old polling first
-      cleanupPolling();
-    }
-
-    // Set polling flag for initial call or consistent retries
-    if (!isCurrentlyPolling) {
-      isCurrentlyPolling = true;
-    }
-
-    try {
-      // Add grace period for large files on first attempt to allow DB commit
-      if (retryCount === 0) {
-        console.log("Adding initial delay for database commit timing...");
-        await new Promise((resolve) => setTimeout(resolve, 1500)); // 1.5 second initial delay
-      }
-
-      // Show loading state with retry information
-      if (retryCount === 0) {
-        if (
-          !summaryOutput.innerHTML ||
-          summaryOutput.innerHTML.includes("fa-spinner")
-        ) {
-          summaryOutput.innerHTML =
-            '<div class="loading-container"><i class="fas fa-spinner fa-spin"></i> <span>Connecting to server...</span></div>';
-        }
-        if (
-          !actualNotes.innerHTML ||
-          actualNotes.innerHTML.includes("fa-spinner")
-        ) {
-          const processingFileName =
-            localStorage.getItem("uploadedFileName") || "your file";
-          actualNotes.innerHTML = `<div class="loading-container"><strong>Uploaded File:</strong> ${processingFileName}<br><br><i class="fas fa-spinner fa-spin"></i> <span>Waiting for processing to start...</span></div>`;
-        }
-      } else {
-        console.log(
-          `Retry attempt ${retryCount}/${maxRetries} for summary ${summaryId}`
-        );
-        // Update UI to show retry status on retries
-        if (summaryOutput.innerHTML.includes("fa-spinner")) {
-          summaryOutput.innerHTML = `<div class="loading-container"><i class="fas fa-spinner fa-spin"></i> <span>Reconnecting... (Attempt ${retryCount}/${maxRetries})</span></div>`;
-        }
-      }
-
-      const response = await fetch(
-        `${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      // Get JSON data even on failure
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Special handling for 404 (record not found yet) with retry
-        if (response.status === 404 && retryCount < maxRetries) {
-          console.log(
-            `Record not found (404), retrying in ${
-              baseDelay * (retryCount + 1)
-            }ms...`
-          );
-          const retryDelay = baseDelay * (retryCount + 1);
-
-          if (actualNotes.innerHTML.includes("fa-spinner")) {
-            actualNotes.innerHTML += `<br><span style="font-size: 0.9em; color: #666;">Retrying in ${
-              retryDelay / 1000
-            }s...</span>`;
+          // Check if already rendering to prevent multiple renders
+          if (isRendering) {
+              console.log("Already rendering fake summary, skipping");
+              return; // Exit early to prevent duplicate rendering
           }
 
-          setTimeout(() => {
-            fetchSummaryFromDatabase(summaryId, retryCount + 1);
-          }, retryDelay);
-          return;
+          // Set rendering flag
+          isRendering = true;
+
+          // Debug: Log the raw fake summary text
+          console.log("=== FAKE SUMMARY RENDERING DEBUG ===");
+          console.log("Raw fake summary:", fakeSummary);
+
+          // Parse and sanitize the markdown summary with error handling
+          try {
+              const formattedFake = formatMarkdown(fakeSummary);
+              console.log("Formatted fake markdown:", formattedFake);
+
+              const renderedHtml = marked.parse(formattedFake);
+              console.log("Fake rendered HTML:", renderedHtml);
+
+              const cleanHtml = DOMPurify.sanitize(renderedHtml);
+              console.log("Fake sanitized HTML:", cleanHtml);
+
+              summaryOutput.innerHTML = cleanHtml;
+              console.log("=== FAKE SUMMARY RENDERING COMPLETE ===");
+          } catch (error) {
+              console.error("Error rendering fake markdown:", error);
+              summaryOutput.innerHTML = `<div class="raw-content">${fakeSummary.replace(/\n/g, '<br>')}</div>`;
+          } finally {
+              // Reset the rendering flag
+              isRendering = false;
+          }
         }
-        // Check for our 'failed' status first
-        if (response.status === 500 && data.status === "failed") {
-          console.error("Summary generation failed:", data.error);
-          summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Error: Summary generation failed.</span></div>`;
-          actualNotes.innerHTML = `<div class="error-container"><strong>Uploaded File:</strong> ${
-            data.original_filename
-          }<br><br>
-                                   <p style="color: red;">${
-                                     data.error ||
-                                     "An unknown error occurred during processing."
-                                   }</p>
-                                   <p class="retry-instruction">Please try uploading the file again.</p></div>`;
-          isCurrentlyPolling = false; // Reset polling flag
-          return; // Stop polling
-        }
-        // Otherwise, it's a different network/server error
-        throw new Error(
-          `Failed to fetch summary: ${response.status} ${data.message || ""}`
-        );
+
+        // Generate summary on load
+        generateSummary();
       }
+    }
 
-      // --- Check Status and Decide Action ---
+    // Function to fetch summary from database with retry logic for race condition
+    async function fetchSummaryFromDatabase(summaryId, retryCount = 0) {
+            const maxRetries = 5;
+            const baseDelay = 1000; // 1 second base delay
+      
+            // Prevent multiple simultaneous polling requests
+            if (isCurrentlyPolling && retryCount === 0) {
+              // If we're already polling but need to start a new fetch (e.g., page reload),
+              // clean up the old polling first
+              cleanupPolling();
+            }
+      
+            // Set polling flag for initial call or consistent retries
+            if (!isCurrentlyPolling) {
+              isCurrentlyPolling = true;
+            }
+      
+            try {
+              // Add grace period for large files on first attempt to allow DB commit
+              if (retryCount === 0) {
+                console.log("Adding initial delay for database commit timing...");
+                await new Promise((resolve) => setTimeout(resolve, 1500)); // 1.5 second initial delay
+              }
+      
+              // Show loading state with retry information
+              if (retryCount === 0) {
+                if (
+                  !summaryOutput.innerHTML ||
+                  summaryOutput.innerHTML.includes("fa-spinner")
+                ) {
+                  summaryOutput.innerHTML =
+                    '<div class="loading-container"><i class="fas fa-spinner fa-spin"></i> <span>Connecting to server...</span></div>';
+                }
+                if (
+                  !actualNotes.innerHTML ||
+                  actualNotes.innerHTML.includes("fa-spinner")
+                ) {
+                  const processingFileName =
+                    localStorage.getItem("uploadedFileName") || "your file";
+                  actualNotes.innerHTML = `<div class="loading-container"><strong>Uploaded File:</strong> ${processingFileName}<br><br><i class="fas fa-spinner fa-spin"></i> <span>Waiting for processing to start...</span></div>`;
+                }
+              } else {
+                console.log(
+                  `Retry attempt ${retryCount}/${maxRetries} for summary ${summaryId}`
+                );
+                // Update UI to show retry status on retries
+                if (summaryOutput.innerHTML.includes("fa-spinner")) {
+                  summaryOutput.innerHTML = `<div class="loading-container"><i class="fas fa-spinner fa-spin"></i> <span>Reconnecting... (Attempt ${retryCount}/${maxRetries})</span></div>`;
+                }
+              }
+      
+              const response = await fetch(
+                `${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+      
+              // Get JSON data even on failure
+              const data = await response.json();
+      
+              if (!response.ok) {
+                // Special handling for 404 (record not found yet) with retry
+                if (response.status === 404 && retryCount < maxRetries) {
+                  console.log(
+                    `Record not found (404), retrying in ${
+                      baseDelay * (retryCount + 1)
+                    }ms...`
+                  );
+                  const retryDelay = baseDelay * (retryCount + 1);
+      
+                  if (actualNotes.innerHTML.includes("fa-spinner")) {
+                    actualNotes.innerHTML += `<br><span style="font-size: 0.9em; color: #666;">Retrying in ${
+                      retryDelay / 1000
+                    }s...</span>`;
+                  }
+      
+                  setTimeout(() => {
+                    fetchSummaryFromDatabase(summaryId, retryCount + 1);
+                  }, retryDelay);
+                  return;
+                }
+                // Check for our 'failed' status first
+                if (response.status === 500 && data.status === "failed") {
+                  console.error("Summary generation failed:", data.error);
+                  summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Error: Summary generation failed.</span></div>`;
+                  actualNotes.innerHTML = `<div class="error-container"><strong>Uploaded File:</strong> ${
+                    data.original_filename
+                  }<br><br>
+                                           <p style="color: red;">${
+                                             data.error ||
+                                             "An unknown error occurred during processing."
+                                           }</p>
+                                           <p class="retry-instruction">Please try uploading the file again.</p></div>`;
+                  isCurrentlyPolling = false; // Reset polling flag
+                  return; // Stop polling
+                }
+                // Otherwise, it's a different network/server error
+                throw new Error(
+                  `Failed to fetch summary: ${response.status} ${data.message || ""}`
+                );
+              }
+      
+              // --- Check Status and Decide Action ---
+      
+              if (data.status === "processing") {
+                currentPollAttempt++;
+                console.log(
+                  `Summary is processing... attempt ${currentPollAttempt}/${maxPollAttempts}`
+                );
+      
+                // Check if we've reached the maximum number of attempts
+                if (currentPollAttempt >= maxPollAttempts) {
+                  summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Timeout: Summary generation took too long.</span></div>`;
+                  actualNotes.innerHTML = `<div class="error-container"><strong>Uploaded File:</strong> ${data.original_filename}<br><br>
+                                           <p style="color: red;">The server is taking too long to process your request.</p>
+                                           <p class="retry-instruction">Please try uploading the file again.</p></div>`;
 
-      if (data.status === "processing") {
-        currentPollAttempt++;
-        console.log(
-          `Summary is processing... attempt ${currentPollAttempt}/${maxPollAttempts}`
-        );
+                  // Stop polling when timed out - clear the polling interval
+                  if (pollIntervalId) {
+                      clearTimeout(pollIntervalId);
+                      pollIntervalId = null;
+                  }
 
-        // Check if we've reached the maximum number of attempts
-        if (currentPollAttempt >= maxPollAttempts) {
-          summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Timeout: Summary generation took too long.</span></div>`;
-          actualNotes.innerHTML = `<div class="error-container"><strong>Uploaded File:</strong> ${data.original_filename}<br><br>
-                                   <p style="color: red;">The server is taking too long to process your request.</p>
-                                   <p class="retry-instruction">Please try uploading the file again.</p></div>`;
-          isCurrentlyPolling = false; // Reset polling flag
-          return; // Stop polling
-        }
+                  isCurrentlyPolling = false; // Reset polling flag
+                  return; // Stop polling
+                }
+      
+                // Update UI to show processing with better feedback
+                summaryOutput.innerHTML = `
+                  <div class="loading-container">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>AI is generating your summary...</span>
+                    <p class="processing-info">Attempt ${currentPollAttempt}/${maxPollAttempts}. This may take a minute. Please keep the page open.</p>
+                  </div>`;
+                actualNotes.innerHTML = `
+                  <div class="loading-container">
+                    <strong>Processing File:</strong> ${data.original_filename}<br><br>
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Currently processing...</span>
+                    <p class="processing-info">Extracting content and generating key points</p>
+                  </div>`;
+      
+                // Ensure PDF viewer is hidden during processing
+                document.getElementById("pdf-viewer-container").style.display = "none";
+                actualNotes.style.display = "block";
+      
+                // Poll again after 5 seconds, but clear the current polling flag first
+                setTimeout(() => {
+                  isCurrentlyPolling = false; // Reset the flag before the next poll
+                  fetchSummaryFromDatabase(summaryId);
+                }, 5000);
+              } else if (data.status === "completed") {
+                console.log("Summary completed!");
+      
+                // Check if already rendering to prevent multiple renders
+                if (isRendering) {
+                    console.log("Already rendering, skipping this update");
+                    return; // Exit early to prevent duplicate rendering
+                }
 
-        // Update UI to show processing with better feedback
-        summaryOutput.innerHTML = `
-          <div class="loading-container">
-            <i class="fas fa-spinner fa-spin"></i>
-            <span>AI is generating your summary...</span>
-            <p class="processing-info">Attempt ${currentPollAttempt}/${maxPollAttempts}. This may take a minute. Please keep the page open.</p>
-          </div>`;
-        actualNotes.innerHTML = `
-          <div class="loading-container">
-            <strong>Processing File:</strong> ${data.original_filename}<br><br>
-            <i class="fas fa-spinner fa-spin"></i>
-            <span>Currently processing...</span>
-            <p class="processing-info">Extracting content and generating key points</p>
-          </div>`;
+                // Set rendering flag
+                isRendering = true;
 
-        // Ensure PDF viewer is hidden during processing
-        document.getElementById("pdf-viewer-container").style.display = "none";
-        actualNotes.style.display = "block";
+                // Reset the poll attempt counter
+                currentPollAttempt = 0;
 
-        // Poll again after 5 seconds, but clear the current polling flag first
-        setTimeout(() => {
-          isCurrentlyPolling = false; // Reset the flag before the next poll
-          fetchSummaryFromDatabase(summaryId);
-        }, 5000);
-      } else if (data.status === "completed") {
-        console.log("Summary completed!");
+                // Debug: Log the raw summary text before processing
+                console.log("=== SUMMARY RENDERING DEBUG ===");
+                console.log("Raw summary text from API:", data.summary_text);
 
-        // Reset the poll attempt counter
-        currentPollAttempt = 0;
+                // Debug: Log the formatted markdown
+                const formattedText = formatMarkdown(data.summary_text);
+                console.log("Formatted markdown:", formattedText);
 
-        // Display the summary text
-        summaryOutput.innerHTML = data.summary_text;
+                try {
+                    // Parse and sanitize the markdown summary with minimal processing
+                    // Since the AI returns properly formatted markdown, we should keep processing simple
+                    const renderedHtml = marked.parse(formattedText);
+                    console.log("Rendered HTML:", renderedHtml);
 
-        // Display the original content preview with a download link
-        actualNotes.innerHTML = `<strong>Uploaded File:</strong> ${data.original_filename}<br>
-          <a href="${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 5px;">
-            <i class="fas fa-download"></i> Download Original File
-          </a><br><br>`;
+                    const cleanHtml = DOMPurify.sanitize(renderedHtml);
+                    console.log("Sanitized HTML:", cleanHtml);
 
+                    summaryOutput.innerHTML = cleanHtml;
+                    console.log("=== SUMMARY RENDERING COMPLETE ===");
+                } catch (error) {
+                    console.error("Error rendering markdown:", error);
+                    console.error("Problematic content:", data.summary_text);
+                    // Fallback: display raw content if markdown rendering fails
+                    summaryOutput.innerHTML = `<div class="raw-content">${data.summary_text.replace(/\n/g, '<br>')}</div>`;
+                } finally {
+                    // Reset the rendering flag
+                    isRendering = false;
+                }
+      
+                // Display the original content preview with a download link
+                actualNotes.innerHTML = `<strong>Uploaded File:</strong> ${data.original_filename}<br>
+                  <a href="${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 5px;">
+                    <i class="fas fa-download"></i> Download Original File
+                  </a><br><br>`;
         // Check if the file is a PDF and display it using PDF.js
         const fileExtension = data.original_filename
           .toLowerCase()
@@ -316,6 +440,12 @@ function initSummaryPage() {
         // Update the uploaded file name in localStorage
         localStorage.setItem("uploadedFileName", data.original_filename);
 
+        // Stop polling when completed - clear the polling interval
+        if (pollIntervalId) {
+            clearTimeout(pollIntervalId);
+            pollIntervalId = null;
+        }
+
         // Reset polling flag when completed
         isCurrentlyPolling = false;
       } else if (data.status === "failed") {
@@ -337,6 +467,12 @@ function initSummaryPage() {
         // Ensure PDF viewer is hidden when processing fails
         document.getElementById("pdf-viewer-container").style.display = "none";
         actualNotes.style.display = "block";
+
+        // Stop polling when failed - clear the polling interval
+        if (pollIntervalId) {
+            clearTimeout(pollIntervalId);
+            pollIntervalId = null;
+        }
 
         // Reset polling flag when failed
         isCurrentlyPolling = false;
@@ -383,6 +519,13 @@ function initSummaryPage() {
       );
       summaryOutput.innerHTML = `<div class="error-container"><i class="fas fa-exclamation-triangle"></i> <span style="color: red;">Error loading summary after ${maxRetries} attempts: ${error.message}</span></div>`;
       actualNotes.innerHTML = `<div class="error-container"><p style="color: red;">Could not load original content. <a href="${CONFIG.BACKEND_URL}/api/ai/summaries/${summaryId}/file" target="_blank" style="color: #007bff;">Download Original File (if available)</a></p></div>`;
+
+      // Stop polling on final failure - clear the polling interval
+      if (pollIntervalId) {
+          clearTimeout(pollIntervalId);
+          pollIntervalId = null;
+      }
+
       isCurrentlyPolling = false; // Reset polling flag on final failure
     }
   }
