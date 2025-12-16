@@ -83,16 +83,17 @@
   width: 100%;
   height: calc(100vh - 300px);
   background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  border-radius: 20px; /* More rounded corners for modern look */
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
   overflow: hidden;
   position: relative;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d1d5db; /* Softer border */
   transition: box-shadow 0.3s ease;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); /* Subtle gradient background */
 }
 
 .mindmap-canvas:hover {
-  box-shadow: 0 20px 40px -3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 40px -3px rgba(0, 0, 0, 0.2); /* Enhanced hover shadow */
 }
 
 /* Loading Container */
@@ -205,36 +206,45 @@
 .mindmap-canvas svg {
   width: 100%;
   height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.mindmap-canvas svg:active {
+  cursor: grabbing;
 }
 
 /* Node Styling Enhancements */
 .node {
-  transition: all 0.2s ease;
+  transition: all 0.3s ease; /* Smoother transitions */
 }
 
 .node circle {
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   filter: url(#dropShadow);
+  cursor: pointer;
 }
 
 .node:hover circle {
-  filter: url(#dropShadow) brightness(1.1);
+  filter: url(#dropShadow) brightness(1.1) saturate(1.2);
 }
 
 .node-label {
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
   pointer-events: none;
+  user-select: none;
 }
 
 /* Link Styling */
 .link {
-  transition: stroke-width 0.2s ease;
+  transition: all 0.3s ease; /* More properties for smoother transition */
 }
 
 .link:hover {
-  stroke-width: 4 !important;
-  stroke-opacity: 0.9 !important;
+  stroke-width: 3.5 !important;
+  stroke-opacity: 0.85 !important;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
 }
 
 /* Reset Button Styling */
