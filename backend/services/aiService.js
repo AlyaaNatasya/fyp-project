@@ -243,7 +243,244 @@ async function generateMindMap(text) {
   }
 }
 
+/**
+ * Send text to the DeepSeek API for flashcard generation
+ * @param {string} text - The text to generate flashcards from
+ * @returns {Promise<Object>} - The generated flashcards structure
+ */
+async function generateFlashcards(text) {
+  try {
+    console.log('Sending request to DeepSeek API for flashcard generation');
+    console.log('Text length being sent:', text.length);
+
+    // Clean the text to remove problematic characters before sending
+    let cleanText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ');
+
+    // Additional sanitization to remove any problematic Unicode characters
+    cleanText = cleanText.replace(/[\u{0080}-\u{FFFF}]/gu, (match) => {
+      if (match.charCodeAt(0) < 0x10000) return ' ';
+      return match; // For valid Unicode characters that don't cause issues
+    });
+
+    // Final check to ensure text is not empty after cleaning
+    if (!cleanText.trim()) {
+      throw new Error('The processed text is empty after sanitization. Please try a different file.');
+    }
+
+    // Get DeepSeek API key from environment variables
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      throw new Error('DeepSeek API key is not configured. Please set DEEPSEEK_API_KEY in your environment variables.');
+    }
+
+    // Prepare the prompt for flashcard generation
+    const prompt = `Analyze the following academic content and generate a set of flashcards. Each flashcard should have a 'front' (the question or concept) and a 'back' (the answer or definition). Return ONLY a valid JSON object with the following structure:\n{\n  "flashcards": [\n    {\n      "front": "Question 1",\n      "back": "Answer 1"\n    },\n    {\n      "front": "Question 2",\n      "back": "Answer 2"\n    }\n  ]\n}\n\nText to analyze:\n\n${cleanText}`;
+
+    // Call the DeepSeek API
+    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: "You are an excellent academic content analyzer. Create a set of high-quality flashcards in JSON format from the provided text. The JSON must be valid and have a 'flashcards' property which is an array of objects with 'front' and 'back' properties. Return ONLY the JSON object with no additional text."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 2000,
+      stream: false
+    }, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 60000,
+    });
+
+    console.log('Received response from DeepSeek API for flashcards:', response.status);
+
+    // Extract the flashcards from the API response
+    if (response.data && response.data.choices && response.data.choices.length > 0) {
+      let content = response.data.choices[0].message.content;
+
+      // Extract JSON from the response if it's wrapped in markdown code blocks
+      let jsonText = content;
+      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```|```([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1] || jsonMatch[2] || content;
+      }
+
+      try {
+        // Parse the JSON response
+        let flashcardsData = JSON.parse(jsonText);
+
+        // Ensure the structure is correct
+        if (!flashcardsData.flashcards || !Array.isArray(flashcardsData.flashcards)) {
+           // specific recovery if the model returns just an array
+           if (Array.isArray(flashcardsData)) {
+               flashcardsData = { flashcards: flashcardsData };
+           } else {
+               throw new Error("Invalid flashcard structure");
+           }
+        }
+
+        console.log('Successfully parsed flashcards JSON');
+        return flashcardsData;
+      } catch (parseError) {
+        console.error('Error parsing flashcards JSON:', parseError.message);
+        console.log('Received content:', content);
+
+        // If JSON parsing fails, return a basic error structure
+        return {
+          flashcards: [
+            { front: "Error parsing flashcards", back: "Please try again." }
+          ]
+        };
+      }
+    } else {
+      throw new Error('Invalid response format from DeepSeek API');
+    }
+  } catch (error) {
+    console.error('Error communicating with DeepSeek API for flashcards:', error.message);
+    if (error.response) {
+        throw new Error(`DeepSeek API error: ${error.response.status}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Send text to the DeepSeek API for quiz generation
+ * @param {string} text - The text to generate quiz from
+ * @returns {Promise<Object>} - The generated quiz structure
+ */
+async function generateQuiz(text) {
+  try {
+    console.log('Sending request to DeepSeek API for quiz generation');
+    console.log('Text length being sent:', text.length);
+
+    // Clean the text to remove problematic characters before sending
+    let cleanText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ');
+
+    // Additional sanitization to remove any problematic Unicode characters
+    cleanText = cleanText.replace(/[\u{0080}-\u{FFFF}]/gu, (match) => {
+      if (match.charCodeAt(0) < 0x10000) return ' ';
+      return match; // For valid Unicode characters that don't cause issues
+    });
+
+    // Final check to ensure text is not empty after cleaning
+    if (!cleanText.trim()) {
+      throw new Error('The processed text is empty after sanitization. Please try a different file.');
+    }
+
+    // Get DeepSeek API key from environment variables
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      throw new Error('DeepSeek API key is not configured. Please set DEEPSEEK_API_KEY in your environment variables.');
+    }
+
+    // Prepare the prompt for quiz generation
+    const prompt = `Analyze the following academic content and generate a multiple-choice quiz. 
+    Each question should have 4 options and clearly indicate the correct answer. 
+    Return ONLY a valid JSON object with the following structure:
+    {
+      "quiz": [
+        {
+          "question": "Question text here?",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correctAnswer": "Option B" // Must match one of the options exactly
+        },
+        ...
+      ]
+    }
+    
+    Text to analyze:
+    ${cleanText}`;
+
+    // Call the DeepSeek API
+    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: "You are an excellent academic content analyzer. Create a high-quality multiple-choice quiz in JSON format from the provided text. The JSON must be valid and follow the specified structure exactly. Return ONLY the JSON object with no additional text."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 2000,
+      stream: false
+    }, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 60000,
+    });
+
+    console.log('Received response from DeepSeek API for quiz:', response.status);
+
+    // Extract the quiz from the API response
+    if (response.data && response.data.choices && response.data.choices.length > 0) {
+      let content = response.data.choices[0].message.content;
+
+      // Extract JSON from the response if it's wrapped in markdown code blocks
+      let jsonText = content;
+      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```|```([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1] || jsonMatch[2] || content;
+      }
+
+      try {
+        // Parse the JSON response
+        let quizData = JSON.parse(jsonText);
+
+        // Ensure the structure is correct
+        if (!quizData.quiz || !Array.isArray(quizData.quiz)) {
+           if (Array.isArray(quizData)) {
+               quizData = { quiz: quizData };
+           } else {
+               throw new Error("Invalid quiz structure");
+           }
+        }
+
+        console.log('Successfully parsed quiz JSON');
+        return quizData;
+      } catch (parseError) {
+        console.error('Error parsing quiz JSON:', parseError.message);
+        console.log('Received content:', content);
+
+        return {
+          quiz: [
+            { 
+              question: "Error parsing quiz data", 
+              options: ["Error", "Please", "Try", "Again"],
+              correctAnswer: "Again"
+            }
+          ]
+        };
+      }
+    } else {
+      throw new Error('Invalid response format from DeepSeek API');
+    }
+  } catch (error) {
+    console.error('Error communicating with DeepSeek API for quiz:', error.message);
+    if (error.response) {
+        throw new Error(`DeepSeek API error: ${error.response.status}`);
+    }
+    throw error;
+  }
+}
+
 module.exports = {
   generateSummary,
-  generateMindMap
+  generateMindMap,
+  generateFlashcards,
+  generateQuiz
 };

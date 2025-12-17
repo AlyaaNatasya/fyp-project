@@ -43,8 +43,15 @@
           <!-- Search Bar -->
           <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="File name" id="file-search" />
-            <button class="search-btn">Search</button>
+            <input type="text" placeholder="Search your files..." id="file-search" autocomplete="off" />
+            <div id="search-results" class="search-results hidden"></div>
+          </div>
+
+          <!-- Selected File Indicator -->
+          <div id="selected-file-container" class="selected-file-container hidden">
+            <span>Selected File:</span>
+            <span id="selected-file-name" class="selected-file-name">None</span>
+            <button id="clear-selection" class="clear-selection-btn"><i class="fas fa-times"></i></button>
           </div>
 
           <!-- Generate Options -->

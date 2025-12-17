@@ -6,7 +6,7 @@ const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const pool = require("../config/db");
 
-const { generateSummary, generateMindMap } = require("../services/aiService");
+const { generateSummary, generateMindMap, generateFlashcards, generateQuiz } = require("../services/aiService");
 
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, "../uploads");
@@ -541,12 +541,104 @@ const generateMindMapFromText = async (req, res) => {
   }
 };
 
+// Generate flashcards from summary text
+const generateFlashcardsFromText = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Text content is required",
+      });
+    }
+
+    // Limit text length to prevent API issues
+    const maxLength = 8000;
+    let processedText = text;
+    if (processedText.length > maxLength) {
+      let truncatedText = processedText.substring(0, maxLength);
+      const sentenceEndings = [
+        truncatedText.lastIndexOf("."),
+        truncatedText.lastIndexOf("!"),
+        truncatedText.lastIndexOf("?"),
+      ];
+      const lastEnding = Math.max(...sentenceEndings);
+      if (lastEnding > maxLength * 0.7) {
+        truncatedText = truncatedText.substring(0, lastEnding + 1);
+      }
+      processedText = truncatedText;
+    }
+
+    // Generate the flashcards using the AI service
+    const flashcardsData = await generateFlashcards(processedText);
+
+    res.status(200).json({
+      success: true,
+      flashcards: flashcardsData.flashcards,
+    });
+  } catch (error) {
+    console.error("Error generating flashcards:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to generate flashcards",
+    });
+  }
+};
+
+// Generate quiz from summary text
+const generateQuizFromText = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Text content is required",
+      });
+    }
+
+    // Limit text length to prevent API issues
+    const maxLength = 8000;
+    let processedText = text;
+    if (processedText.length > maxLength) {
+      let truncatedText = processedText.substring(0, maxLength);
+      const sentenceEndings = [
+        truncatedText.lastIndexOf("."),
+        truncatedText.lastIndexOf("!"),
+        truncatedText.lastIndexOf("?"),
+      ];
+      const lastEnding = Math.max(...sentenceEndings);
+      if (lastEnding > maxLength * 0.7) {
+        truncatedText = truncatedText.substring(0, lastEnding + 1);
+      }
+      processedText = truncatedText;
+    }
+
+    // Generate the quiz using the AI service
+    const quizData = await generateQuiz(processedText);
+
+    res.status(200).json({
+      success: true,
+      quiz: quizData.quiz,
+    });
+  } catch (error) {
+    console.error("Error generating quiz:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to generate quiz",
+    });
+  }
+};
+
 module.exports = {
   generateSummaryFromUpload,
   getSummaryById,
   getUserSummaries,
   getOriginalFile,
   saveSummaryToCollection,
-  generateMindMapFromText, // Export the new mind map function
-  upload, // Export multer instance for use in routes
+  generateMindMapFromText,
+  generateFlashcardsFromText,
+  generateQuizFromText,
+  upload,
 };

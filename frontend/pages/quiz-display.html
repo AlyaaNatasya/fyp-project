@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyBloom - Take Quiz</title>
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <!-- Page-Specific Styles -->
+    <link rel="stylesheet" href="../css/quiz-display.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- This will be replaced with the shared sidebar -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- Quiz content will be injected here -->
+      <script type="text/template" id="page-content">
+        <!-- Header -->
+        <header class="header">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Quiz Mode</h1>
+          <a href="#" class="logout-btn">Log out</a>
+        </header>
+
+        <!-- Welcome Message -->
+        <div class="welcome-section">
+          <h2>Hello, <span id="username">Student</span>!</h2>
+        </div>
+
+        <div class="quiz-container">
+            <div class="controls-header">
+                <button id="back-to-quizzes-btn" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Quizzes
+                </button>
+            </div>
+            
+            <div id="quiz-display-area">
+                <!-- Quiz content will be rendered here dynamically -->
+                <div class="loading-container">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading Quiz...</span>
+                </div>
+            </div>
+        </div>
+      </script>
+    </div>
+
+    <!-- Configuration -->
+    <script src="../js/config.js"></script>
+    <!-- Shared JS -->
+    <script src="../js/main.js"></script>
+    <!-- Page-Specific JS -->
+    <script src="../js/quiz-display.js"></script>
+  </body>
+</html>
