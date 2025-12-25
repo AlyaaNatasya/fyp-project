@@ -8,6 +8,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const signupMessage = document.getElementById("signup-message");
   const loginMessage = document.getElementById("login-message");
 
+  // About Us Modal functionality
+  const aboutUsBtn = document.getElementById("about-us-btn");
+  const aboutUsModal = document.getElementById("aboutUsModal");
+  const closeAboutModal = document.getElementById("closeAboutModal");
+
   // Tab switching
   signupTab?.addEventListener("click", function () {
     signupTab.classList.add("active");
@@ -148,4 +153,22 @@ document.addEventListener("DOMContentLoaded", function () {
     if (signupMessage) signupMessage.className = "auth-message";
     if (loginMessage) loginMessage.className = "auth-message";
   }
+
+  // About Us button functionality
+  aboutUsBtn?.addEventListener("click", function (e) {
+    e.preventDefault();
+    aboutUsModal.style.display = "flex";
+  });
+
+  // Close About Us modal
+  closeAboutModal?.addEventListener("click", function () {
+    aboutUsModal.style.display = "none";
+  });
+
+  // Close modal when clicking outside the content
+  window.addEventListener("click", function (e) {
+    if (e.target === aboutUsModal) {
+      aboutUsModal.style.display = "none";
+    }
+  });
 });
