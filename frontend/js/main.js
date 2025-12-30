@@ -348,18 +348,6 @@ function showCreateCollectionModal() {
   });
 }
 
-// Handle Read More Button
-function initReadMoreButton() {
-  const readMoreBtn = document.querySelector(".read-more-btn");
-  if (readMoreBtn) {
-    readMoreBtn.addEventListener("click", function () {
-      alert(
-        "This would typically navigate to a page with more information about the app."
-      );
-    });
-  }
-}
-
 // Prevent zoom on mobile devices for form inputs
 function preventMobileZoom() {
   const inputs = document.querySelectorAll("input, select, textarea");
@@ -376,9 +364,7 @@ function preventMobileZoom() {
 document.addEventListener("DOMContentLoaded", function () {
   const currentPage = window.location.pathname.split("/").pop();
 
-  if (currentPage === "home.html") {
-    initReadMoreButton();
-  } else {
+  if (currentPage !== "home.html") {
     loadSharedLayout(); // This will call initPageAfterLoad() after content is loaded
   }
 
