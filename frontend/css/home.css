@@ -374,6 +374,59 @@
   display: block;
 }
 
+/* Forgot Password Modal */
+.forgot-step {
+  padding: 10px 0;
+}
+
+.forgot-step p {
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.forgot-step input[type="text"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.forgot-step input[type="text"]:focus {
+  border-color: var(--primary-bg);
+  outline: none;
+}
+
+.forgot-step .auth-btn.secondary {
+  background-color: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--text-light);
+  margin-top: 10px;
+}
+
+.forgot-step .auth-btn.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#forgotSuccess i {
+  font-size: 64px;
+  color: #4CAF50;
+  margin-bottom: 20px;
+}
+
+#forgotSuccess h4 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--text-dark);
+}
+
+#forgotSuccess p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .main-content {

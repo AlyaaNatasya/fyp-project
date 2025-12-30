@@ -80,3 +80,19 @@ CREATE TABLE IF NOT EXISTS collection_items (
 CREATE INDEX idx_user_id_collections ON collections(user_id);
 CREATE INDEX idx_collection_id ON collection_items(collection_id);
 CREATE INDEX idx_summary_id ON collection_items(summary_id);
+
+-- Create password_resets table for OTP-based password reset
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    otp VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create index for password_resets
+CREATE INDEX idx_email_otp ON password_resets(email, otp);
+CREATE INDEX idx_expires_at ON password_resets(expires_at);

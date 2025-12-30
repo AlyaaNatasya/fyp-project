@@ -172,6 +172,263 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Forgot Password functionality
+  const forgotPasswordLink = document.querySelector(".forgot-password");
+
+  function createForgotPasswordModal() {
+    const modal = document.createElement("div");
+    modal.id = "forgotPasswordModal";
+    modal.className = "modal";
+    modal.style.display = "none";
+    modal.innerHTML = `
+      <div class="modal-content">
+        <span class="close-modal" id="closeForgotPasswordModal">&times;</span>
+        <h3>Reset Password</h3>
+
+        <!-- Step 1: Enter Email -->
+        <div id="forgotStep1" class="forgot-step">
+          <p>Enter your email address to receive a One-Time Password (OTP).</p>
+          <form id="forgotEmailForm">
+            <div class="form-group">
+              <label for="forgot-email">Email Address</label>
+              <input type="email" id="forgot-email" name="email" required />
+            </div>
+            <button type="submit" class="auth-btn">Send OTP</button>
+            <div class="auth-message" id="forgot-email-message"></div>
+          </form>
+        </div>
+
+        <!-- Step 2: Enter OTP -->
+        <div id="forgotStep2" class="forgot-step" style="display: none;">
+          <p>Enter the 6-digit OTP sent to your email.</p>
+          <form id="forgotOTPForm">
+            <div class="form-group">
+              <label for="forgot-otp">OTP</label>
+              <input type="text" id="forgot-otp" name="otp" maxlength="6" required pattern="\\d{6}" />
+            </div>
+            <button type="submit" class="auth-btn">Verify OTP</button>
+            <button type="button" class="auth-btn secondary" id="resendOTP">Resend OTP</button>
+            <div class="auth-message" id="forgot-otp-message"></div>
+          </form>
+        </div>
+
+        <!-- Step 3: Enter New Password -->
+        <div id="forgotStep3" class="forgot-step" style="display: none;">
+          <p>Enter your new password.</p>
+          <form id="forgotResetForm">
+            <div class="form-group">
+              <label for="forgot-new-password">New Password</label>
+              <div class="password-input">
+                <input type="password" id="forgot-new-password" name="newPassword" required />
+                <i class="fas fa-eye toggle-password"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="forgot-confirm-password">Confirm New Password</label>
+              <div class="password-input">
+                <input type="password" id="forgot-confirm-password" name="confirmPassword" required />
+                <i class="fas fa-eye toggle-password"></i>
+              </div>
+            </div>
+            <button type="submit" class="auth-btn">Reset Password</button>
+            <div class="auth-message" id="forgot-reset-message"></div>
+          </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="forgotSuccess" class="forgot-step" style="display: none; text-align: center;">
+          <i class="fas fa-check-circle" style="font-size: 64px; color: #4CAF50; margin-bottom: 20px;"></i>
+          <h4>Password Reset Successful!</h4>
+          <p>You can now login with your new password.</p>
+          <button class="auth-btn" id="closeSuccessBtn">Back to Login</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  const forgotPasswordModal = createForgotPasswordModal();
+
+  let forgotEmail = "";
+
+  // Open forgot password modal
+  forgotPasswordLink?.addEventListener("click", function (e) {
+    e.preventDefault();
+    forgotPasswordModal.style.display = "flex";
+    // Reset to step 1
+    document.getElementById("forgotStep1").style.display = "block";
+    document.getElementById("forgotStep2").style.display = "none";
+    document.getElementById("forgotStep3").style.display = "none";
+    document.getElementById("forgotSuccess").style.display = "none";
+    forgotEmail = "";
+    clearForgotMessages();
+  });
+
+  // Close modal
+  document.getElementById("closeForgotPasswordModal")?.addEventListener("click", function () {
+    forgotPasswordModal.style.display = "none";
+  });
+
+  // Close modal when clicking outside
+  forgotPasswordModal?.addEventListener("click", function (e) {
+    if (e.target === forgotPasswordModal) {
+      forgotPasswordModal.style.display = "none";
+    }
+  });
+
+  // Step 1: Send OTP
+  document.getElementById("forgotEmailForm")?.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const email = document.getElementById("forgot-email").value;
+    forgotEmail = email;
+
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showForgotMessage("forgot-email-message", data.message, "success");
+        // Move to step 2 after 1 second
+        setTimeout(() => {
+          document.getElementById("forgotStep1").style.display = "none";
+          document.getElementById("forgotStep2").style.display = "block";
+        }, 1000);
+      } else {
+        showForgotMessage("forgot-email-message", data.message, "error");
+      }
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      showForgotMessage("forgot-email-message", "Could not connect to server.", "error");
+    }
+  });
+
+  // Step 2: Verify OTP
+  document.getElementById("forgotOTPForm")?.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const otp = document.getElementById("forgot-otp").value;
+
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showForgotMessage("forgot-otp-message", data.message, "success");
+        // Move to step 3 after 1 second
+        setTimeout(() => {
+          document.getElementById("forgotStep2").style.display = "none";
+          document.getElementById("forgotStep3").style.display = "block";
+        }, 1000);
+      } else {
+        showForgotMessage("forgot-otp-message", data.message, "error");
+      }
+    } catch (err) {
+      console.error("Verify OTP error:", err);
+      showForgotMessage("forgot-otp-message", "Could not connect to server.", "error");
+    }
+  });
+
+  // Resend OTP
+  document.getElementById("resendOTP")?.addEventListener("click", async function () {
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showForgotMessage("forgot-otp-message", "New OTP sent successfully!", "success");
+      } else {
+        showForgotMessage("forgot-otp-message", data.message, "error");
+      }
+    } catch (err) {
+      console.error("Resend OTP error:", err);
+      showForgotMessage("forgot-otp-message", "Could not connect to server.", "error");
+    }
+  });
+
+  // Step 3: Reset Password
+  document.getElementById("forgotResetForm")?.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const newPassword = document.getElementById("forgot-new-password").value;
+    const confirmPassword = document.getElementById("forgot-confirm-password").value;
+    const otp = document.getElementById("forgot-otp").value;
+
+    if (newPassword !== confirmPassword) {
+      showForgotMessage("forgot-reset-message", "Passwords do not match!", "error");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showForgotMessage("forgot-reset-message", "Password must be at least 8 characters!", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Show success screen
+        document.getElementById("forgotStep3").style.display = "none";
+        document.getElementById("forgotSuccess").style.display = "block";
+      } else {
+        showForgotMessage("forgot-reset-message", data.message, "error");
+      }
+    } catch (err) {
+      console.error("Reset password error:", err);
+      showForgotMessage("forgot-reset-message", "Could not connect to server.", "error");
+    }
+  });
+
+  // Close success screen
+  document.getElementById("closeSuccessBtn")?.addEventListener("click", function () {
+    forgotPasswordModal.style.display = "none";
+  });
+
+  // Utility functions for forgot password
+  function showForgotMessage(elementId, message, type) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = message;
+      element.className = "auth-message " + type;
+    }
+  }
+
+  function clearForgotMessages() {
+    const messageElements = [
+      "forgot-email-message",
+      "forgot-otp-message",
+      "forgot-reset-message"
+    ];
+    messageElements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = "";
+        element.className = "auth-message";
+      }
+    });
+  }
+
   // Read More button functionality - Modal approach
   const readMoreBtn = document.querySelector(".read-more-btn");
 

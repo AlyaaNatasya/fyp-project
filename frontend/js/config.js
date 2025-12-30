@@ -3,10 +3,10 @@
 
 const CONFIG = {
   // Backend API URL - Using IP address for consistent resolution
-  BACKEND_URL: "http://127.0.0.1:5001",
-  
+  BACKEND_URL: "http://127.0.0.1:5000",
+
   // Alternative: You can use this if you prefer localhost
-  // BACKEND_URL: "http://localhost:5001",
+  // BACKEND_URL: "http://localhost:5000",
   
   // Timeout settings (in milliseconds)
   REQUEST_TIMEOUT: 300000, // 5 minutes for AI processing
