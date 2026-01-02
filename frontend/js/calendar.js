@@ -30,9 +30,11 @@ function editReminder(reminder) {
   if (["exam", "quiz", "activity"].includes(reminder.category)) {
     categorySelect.value = reminder.category;
     customInput.style.display = "none";
+    customInput.disabled = true;
   } else {
     categorySelect.value = "custom";
     customInput.style.display = "block";
+    customInput.disabled = false;
     customInput.value = reminder.category;
   }
 
@@ -88,8 +90,24 @@ function setupReminderModal() {
   // Toggle custom category
   window.toggleCustomCategory = function (select) {
     const customInput = document.getElementById("custom-category");
-    customInput.style.display = select.value === "custom" ? "block" : "none";
+    if (select.value === "custom") {
+      customInput.style.display = "block";
+      customInput.disabled = false;
+      customInput.focus();
+    } else {
+      customInput.style.display = "none";
+      customInput.disabled = true;
+      customInput.value = "";
+    }
   };
+
+  // Add event listener to category select
+  const categorySelect = document.getElementById("reminder-category");
+  if (categorySelect) {
+    categorySelect.addEventListener("change", function() {
+      window.toggleCustomCategory(this);
+    });
+  }
 
   // Save reminder
   reminderForm.addEventListener("submit", function (e) {
@@ -170,9 +188,15 @@ function setupReminderModal() {
     const reminderModal = document.getElementById("reminder-modal");
     const reminderForm = document.getElementById("reminder-form");
     const reminderDateInput = document.getElementById("reminder-date");
+    const customInput = document.getElementById("custom-category");
 
     reminderForm.reset();
     window.editingReminder = null;
+
+    // Reset custom category input to hidden and disabled
+    customInput.style.display = "none";
+    customInput.disabled = true;
+    customInput.value = "";
 
     // Format date for input without timezone conversion
     const year = date.getFullYear();

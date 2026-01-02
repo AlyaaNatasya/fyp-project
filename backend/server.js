@@ -10,6 +10,7 @@ const authRoutes = require("./routes/authRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
+const { startReminderScheduler } = require("./schedulers/reminderScheduler");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -112,6 +113,9 @@ app.set("trust proxy", true); // Trust proxy if behind nginx/load balancer
 const server = app.listen(PORT, "127.0.0.1", () => {
   console.log(`🚀 Server running at http://127.0.0.1:${PORT}`);
   console.log("Open your frontend at http://127.0.0.1:5001/pages/home.html");
+  
+  // Start the reminder scheduler
+  startReminderScheduler();
 });
 
 // Set timeout values to handle long-running requests

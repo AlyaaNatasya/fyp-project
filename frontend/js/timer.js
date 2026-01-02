@@ -139,7 +139,7 @@ function initTimerPage() {
       } else {
         // Timer finished, handle Pomodoro cycle
         pauseTimer();
-        
+
         if (currentPomodoroPhase === "study") {
           // Study time is over, switch to break
           currentPomodoroPhase = "break";
@@ -159,7 +159,7 @@ function initTimerPage() {
           totalSeconds = initialSeconds;
           alert("Break time is over! Let's get back to studying.");
         }
-        
+
         updateTimerDisplay();
         startTimer(); // Automatically start the next phase
       }
@@ -185,7 +185,7 @@ function initTimerPage() {
 
     // ✅ Reset time back to original value
     totalSeconds = initialSeconds;
-    
+
     // If in Pomodoro mode, reset the phase to study
     if (timerMode.textContent.includes("Pomodoro")) {
       currentPomodoroPhase = "study";
@@ -195,7 +195,7 @@ function initTimerPage() {
       initialSeconds = 25 * 60; // Reset to study time
       totalSeconds = initialSeconds;
     }
-    
+
     updateTimerDisplay();
   }
 }

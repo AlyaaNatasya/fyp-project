@@ -314,6 +314,18 @@
   border: 1px solid #ccc;
   border-radius: var(--radius);
   font-size: 1rem;
+  pointer-events: auto;
+  user-select: auto;
+}
+
+.modal-content input[type="text"]:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.modal-content input[type="text"]:not(:disabled) {
+  background-color: white;
+  cursor: text;
 }
 
 .modal-content button[type="submit"] {

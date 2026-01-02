@@ -23,6 +23,15 @@ window.initDashboardPage = function() {
   });
 };
 
+// Function to format date as day/month/year
+function formatReminderDate(dateString) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 // Function to show upcoming reminders (due tomorrow)
 function showUpcomingReminders() {
   const notificationSection = document.getElementById("upcoming-reminders");
@@ -92,7 +101,7 @@ function showUpcomingReminders() {
               <strong>${reminder.title}</strong>
               ${categoryLabel}
             </div>
-            <div class="date">${new Date(reminder.date).toLocaleDateString()}</div>
+            <div class="date">${formatReminderDate(reminder.date)}</div>
           `;
           notificationSection.appendChild(reminderElement);
         });

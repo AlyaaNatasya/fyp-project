@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS reminders (
     description TEXT,
     category VARCHAR(100),
     date DATETIME NOT NULL,
+    email_sent BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -31,6 +32,7 @@ CREATE TABLE IF NOT EXISTS reminders (
 -- Create indexes for better performance
 CREATE INDEX idx_user_id ON reminders(user_id);
 CREATE INDEX idx_date ON reminders(date);
+CREATE INDEX idx_email_sent ON reminders(email_sent);
 
 -- Create summaries table
 CREATE TABLE IF NOT EXISTS summaries (
