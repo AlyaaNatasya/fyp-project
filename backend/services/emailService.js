@@ -123,7 +123,7 @@ const sendReminderEmail = async (userEmail, userName, reminderTitle, reminderDes
               </div>
               
               <p>Make sure to complete this task on time. Good luck! 🎯</p>
-              <p>Best regards,<br>StudyBloom Team</p>
+              <p>Best regards,<br>NotePetal Team ♥</p>
             </div>
             <div class="footer">
               <p>You received this email because you have reminders set up in your StudyBloom account.</p>
