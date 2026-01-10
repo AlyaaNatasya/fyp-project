@@ -321,9 +321,6 @@ function showCreateCollectionModal() {
       // Close modal
       document.body.removeChild(modal);
 
-      // Show success message and reload collections if on collection page
-      alert("Collection created successfully!");
-
       // Refresh Sidebar Collections
       loadSidebarCollections();
 

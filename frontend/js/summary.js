@@ -1042,9 +1042,8 @@ function initSummaryPage() {
         throw new Error(errorData.message || "Failed to save to collection");
       }
 
-      // Show confirmation and redirect
-      alert("Summary saved to your collection!");
-      window.location.href = "../pages/collection.html"; // Redirect to collection page
+      // Redirect to collection page
+      window.location.href = "../pages/collection.html";
     } catch (error) {
       console.error("Error saving to collection:", error);
       alert("Error saving to collection: " + error.message);
@@ -1058,7 +1057,6 @@ function initSummaryPage() {
     localStorage.setItem("studybloom-last-summary", summaryText);
 
     // Redirect to mind map page
-    alert("Generating mind map...");
     window.location.href = "../pages/mindmap.html";
   });
 }

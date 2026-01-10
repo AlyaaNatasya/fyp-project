@@ -81,16 +81,16 @@ const checkRemindersDueTomorrow = async () => {
 
 /**
  * Start the reminder scheduler
- * Runs every day at 10:00 PM
+ * Runs every day at 9:00 AM
  */
 const startReminderScheduler = () => {
-  // Run daily at 10:00 PM
-  cron.schedule('0 22 * * *', () => {
-    console.log('⏰ Running scheduled reminder check at 10:00 PM');
+  // Run daily at 9:00 AM
+  cron.schedule('0 9 * * *', () => {
+    console.log('⏰ Running scheduled reminder check at 9:00 AM');
     checkRemindersDueTomorrow();
   });
 
-  console.log('📅 Reminder scheduler started. Will check daily at 10:00 PM');
+  console.log('📅 Reminder scheduler started. Will check daily at 9:00 AM');
   
   // Optional: Run once on startup for testing (comment out in production)
   // console.log('🧪 Running initial check on startup...');

@@ -243,14 +243,6 @@ async function removeSummaryFromCollection(
 }
 
 async function deleteCollection(collectionId, collectionElement) {
-  if (
-    !confirm(
-      "Are you sure you want to delete this collection? This will also delete all summaries in this collection."
-    )
-  ) {
-    return; // Exit if user cancels
-  }
-
   try {
     // Call the API to delete the collection
     const response = await fetch(
@@ -284,9 +276,12 @@ async function deleteCollection(collectionId, collectionElement) {
           <p class="empty-message">No collections created yet. Add your first collection using the button above.</p>
         `;
       }
-    }, 300);
 
-    alert("Collection deleted successfully!");
+      // Refresh sidebar collections
+      if (typeof loadSidebarCollections === "function") {
+        loadSidebarCollections();
+      }
+    }, 300);
   } catch (error) {
     console.error("Error deleting collection:", error);
     alert("Error deleting collection: " + error.message);
