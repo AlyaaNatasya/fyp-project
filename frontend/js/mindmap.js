@@ -43,6 +43,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Initialize the mind map page
 function initMindMap() {
+  // Wait for back button to exist (content is injected by main.js)
+  const backBtnCheck = setInterval(() => {
+    const backBtn = document.querySelector(".back-to-summary-btn");
+    if (backBtn) {
+      clearInterval(backBtnCheck);
+      backBtn.addEventListener("click", function () {
+        window.location.href = "summary.html";
+      });
+    }
+  }, 100);
+
   // Optional: Retrieve last summary
   const lastSummary = localStorage.getItem("studybloom-last-summary");
 
