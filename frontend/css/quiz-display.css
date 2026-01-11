@@ -29,7 +29,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -49,7 +49,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 .welcome-section {
@@ -151,8 +152,15 @@
 }
 
 .option-item:hover {
-    background-color: #fff8f0;
-    border-color: #d4a86a;
+    background-color: var(--primary-color);
+    border-color: var(--primary-dark);
+    color: white;
+}
+
+.option-item:hover .option-marker {
+    background-color: white;
+    border-color: white;
+    color: var(--primary-color);
 }
 
 .option-item.selected {
@@ -227,7 +235,7 @@
 }
 
 .next-btn:hover {
-    background-color: #a67c52;
+    background-color: var(--primary-dark);
 }
 
 .next-btn:disabled {

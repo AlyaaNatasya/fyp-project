@@ -52,6 +52,48 @@ function loadSharedLayout() {
 }
 
 /**
+ * Load user theme from database
+ */
+function loadUserThemeFromDatabase() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  fetch(`${CONFIG.BACKEND_URL}/api/users/profile`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.user) {
+      // Store user's theme colors in localStorage
+      if (data.user.theme_color) {
+        localStorage.setItem("userThemeColor", data.user.theme_color);
+      }
+      if (data.user.background_color) {
+        localStorage.setItem("userBackgroundColor", data.user.background_color);
+      }
+
+      // Apply the theme immediately
+      applyUserThemeColor();
+    }
+  })
+  .catch(error => {
+    console.error("Error loading user theme:", error);
+    // If error, use default colors
+    if (!localStorage.getItem("userThemeColor")) {
+      localStorage.setItem("userThemeColor", "#c1946e");
+    }
+    if (!localStorage.getItem("userBackgroundColor")) {
+      localStorage.setItem("userBackgroundColor", "#fee3c3");
+    }
+    applyUserThemeColor();
+  });
+}
+
+/**
  * Initializes the page after layout is loaded
  */
 function initPageAfterLoad() {
@@ -71,6 +113,8 @@ function initPageAfterLoad() {
 
     if (payload.exp && payload.exp < now) {
       localStorage.removeItem("token");
+      localStorage.removeItem("userThemeColor");
+      localStorage.removeItem("userBackgroundColor");
       alert("Session expired. Please log in again.");
       window.location.href = "home.html";
       return;
@@ -88,6 +132,12 @@ function initPageAfterLoad() {
     const linkMap = {
       "dashboard.html": "Home",
       "calendar.html": "Calendar",
+      "collection.html": "Collection",
+      "uploadNote.html": "Summary",
+      "quizzes.html": "Quizzes",
+      "timer.html": "Timer",
+      "profile.html": "Profile",
+      "collection-detail.html": "Collection"
     };
     const activeText = linkMap[currentPage];
 
@@ -100,6 +150,9 @@ function initPageAfterLoad() {
         }
       });
     }
+
+    // ✅ Load user theme from database
+    loadUserThemeFromDatabase();
 
     // ✅ Setup global UI (hamburger, logout, dropdowns)
     setupGlobalUI();
@@ -130,9 +183,22 @@ function initPageAfterLoad() {
     ) {
       window.initDashboardPage();
     }
+
+    // ✅ Initialize Profile Page
+    if (
+      currentPage === "profile.html" &&
+      typeof window.initProfilePage === "function"
+    ) {
+      window.initProfilePage();
+    }
+
+    // Apply user theme color
+    applyUserThemeColor();
   } catch (err) {
     console.warn("Invalid token:", err);
     localStorage.removeItem("token");
+    localStorage.removeItem("userThemeColor");
+    localStorage.removeItem("userBackgroundColor");
     window.location.href = "home.html";
   }
 }
@@ -144,6 +210,11 @@ function setupGlobalUI() {
   const menuToggle = document.querySelector(".menu-toggle");
   const sidebar = document.querySelector(".sidebar");
   const logoutBtn = document.querySelector(".logout-btn");
+
+  console.log("setupGlobalUI called");
+  console.log("menuToggle:", menuToggle);
+  console.log("sidebar:", sidebar);
+  console.log("logoutBtn:", logoutBtn);
 
   // Restore sidebar state from localStorage on page load
   if (sidebar) {
@@ -157,10 +228,16 @@ function setupGlobalUI() {
   }
 
   if (menuToggle && sidebar) {
+    console.log("Adding click listener to menu toggle");
     menuToggle.addEventListener("click", function (e) {
       e.preventDefault();
+      console.log("Menu toggle clicked");
+      console.log("Window width:", window.innerWidth);
+      console.log("Sidebar classes before:", sidebar.className);
+      
       if (window.innerWidth <= 768) {
         sidebar.classList.toggle("active");
+        console.log("Sidebar classes after mobile toggle:", sidebar.className);
         // Save mobile sidebar state
         if (sidebar.classList.contains("active")) {
           localStorage.setItem("sidebarState", "active");
@@ -169,6 +246,7 @@ function setupGlobalUI() {
         }
       } else {
         sidebar.classList.toggle("collapsed");
+        console.log("Sidebar classes after desktop toggle:", sidebar.className);
         // Save desktop sidebar state
         if (sidebar.classList.contains("collapsed")) {
           localStorage.setItem("sidebarState", "collapsed");
@@ -177,6 +255,8 @@ function setupGlobalUI() {
         }
       }
     });
+  } else {
+    console.log("Cannot add click listener - menuToggle or sidebar not found");
   }
 
   document.addEventListener("click", function (e) {
@@ -194,25 +274,27 @@ function setupGlobalUI() {
       e.preventDefault();
       localStorage.removeItem("token");
       localStorage.removeItem("sidebarState"); // Clear sidebar state on logout
-      window.location.href = "home.html";
-    });
-  }
+        localStorage.removeItem("userThemeColor"); // Clear theme color on logout
+        localStorage.removeItem("userBackgroundColor"); // Clear background color on logout
+        window.location.href = "home.html";
+      });
+    }
 
-  // Add event listener for new folder button to create collections
-  const newFolderBtn = document.querySelector(".new-folder-btn");
-  if (newFolderBtn) {
-    newFolderBtn.addEventListener("click", showCreateCollectionModal);
-  }
+    // Add event listener for new folder button to create collections
+    const newFolderBtn = document.querySelector(".new-folder-btn");
+    if (newFolderBtn) {
+      newFolderBtn.addEventListener("click", showCreateCollectionModal);
+    }
 
-  // Collection Dropdown Toggle
-  const collectionToggle = document.getElementById("collection-dropdown-toggle");
-  if (collectionToggle) {
-    collectionToggle.addEventListener("click", function(e) {
-      // If clicking the link inside, don't toggle if it's meant to navigate (but here it's a div)
-      const parentLi = this.closest(".nav-item-dropdown");
-      parentLi.classList.toggle("active");
-    });
-  }
+    // Collection Dropdown Toggle
+    const collectionToggle = document.getElementById("collection-dropdown-toggle");
+    if (collectionToggle) {
+      collectionToggle.addEventListener("click", function(e) {
+        // If clicking the link inside, don't toggle if it's meant to navigate (but here it's a div)
+        const parentLi = this.closest(".nav-item-dropdown");
+        parentLi.classList.toggle("active");
+      });
+    }
 }
 
 /**
@@ -355,6 +437,38 @@ function preventMobileZoom() {
       }
     });
   });
+}
+
+// Apply user theme color across the application
+function applyUserThemeColor() {
+  const themeColor = localStorage.getItem("userThemeColor");
+  if (themeColor) {
+    // Update CSS variables
+    document.documentElement.style.setProperty('--primary-color', themeColor);
+
+    // Calculate lighter and darker shades
+    const lighterColor = adjustColorBrightness(themeColor, 20);
+    const darkerColor = adjustColorBrightness(themeColor, -20);
+
+    document.documentElement.style.setProperty('--primary-light', lighterColor);
+    document.documentElement.style.setProperty('--primary-dark', darkerColor);
+  }
+
+  const backgroundColor = localStorage.getItem("userBackgroundColor");
+  if (backgroundColor) {
+    // Update CSS variables
+    document.documentElement.style.setProperty('--primary-bg', backgroundColor);
+  }
+}
+
+// Helper function to adjust color brightness
+function adjustColorBrightness(color, amount) {
+  const hex = color.replace('#', '');
+  const num = parseInt(hex, 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+  return '#' + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
 }
 
 // 🔥 ONE DOMContentLoaded

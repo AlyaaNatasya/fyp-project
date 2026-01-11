@@ -30,7 +30,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -50,7 +50,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 /* Welcome Section */
@@ -297,7 +298,33 @@
 }
 
 .btn-primary:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  flex: 1;
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background-color: #d0d0d0;
 }
 
 .collection-section {
@@ -325,7 +352,7 @@
 }
 
 .collection-header:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
 }
 
 .collection-title {
@@ -360,7 +387,7 @@
 .delete-collection-btn {
   background: none;
   border: none;
-  color: #a67c52;
+  color: var(--primary-bg);
   cursor: pointer;
   font-size: 1rem;
   padding: 4px;
@@ -375,7 +402,7 @@
 
 .delete-collection-btn:hover {
   background-color: #f0e6d9;
-  color: #8a6543;
+  color: var(--primary-bg);
   transform: scale(1.1);
 }
 

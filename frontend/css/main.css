@@ -26,6 +26,8 @@ body {
 :root {
   --primary-bg: #fee3c3;
   --primary-color: #c1946e;
+  --primary-light: #d4a982;
+  --primary-dark: #a67c52;
   --text-dark: #333;
   --text-light: #fff;
   --border-color: #ddd;
@@ -94,10 +96,6 @@ body {
   transition: var(--transition);
 }
 
-.new-folder-btn:hover {
-  background-color: #f8d5a3;
-}
-
 /* Navigation Menu */
 .nav-menu ul {
   list-style: none;
@@ -133,8 +131,8 @@ body {
 
 .nav-link.active,
 .nav-link:hover {
-  background-color: #a67c52;
-  color: var(--primary-bg);
+  background-color: var(--primary-bg);
+  color: var(--text-light);
 }
 
 /* Dropdown Styles */
@@ -295,6 +293,41 @@ button, input, select, textarea {
     h3 { font-size: 1.4rem; }
     h4 { font-size: 1.2rem; }
   }
+
+/* ==========================================
+   SHARED BUTTON STYLES (For all pages)
+   ========================================== */
+
+/* Menu Toggle Button */
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 5px;
+  transition: var(--transition);
+}
+
+.menu-toggle:hover {
+  color: var(--primary-dark);
+}
+
+/* Logout Button */
+.logout-btn {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  background-color: white;
+  transition: var(--transition);
+}
+
+.logout-btn:hover {
+  background-color: var(--primary-dark);
+  color: white;
+}
   
   /* ==========================================
      MODAL STYLES
@@ -392,7 +425,7 @@ button, input, select, textarea {
   }
   
   .modal .btn-primary:hover {
-    background-color: #a67c52;
+    background-color: var(--primary-bg);
   }
   
 /* ==========================================

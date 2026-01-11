@@ -159,44 +159,89 @@ async function loadCollectionDetail(collectionId) {
 }
 
 async function removeSummaryFromCollection(collectionId, summaryId, summaryCard) {
-  if (!confirm("Are you sure you want to remove this summary from the collection?")) {
-    return; // Exit if user cancels
-  }
+  // Create confirmation modal
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Remove Summary</h3>
+      <p>Are you sure you want to remove this summary from the collection?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+        <button type="button" class="btn-primary confirm-btn">Remove</button>
+      </div>
+    </div>
+  `;
 
-  try {
-    // Call the API to remove the summary from the collection
-    const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries/${summaryId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
+  document.body.appendChild(modal);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to remove summary from collection');
-    }
+  // Show modal
+  modal.classList.add("active");
 
-    // Remove the summary card from the DOM with animation
-    summaryCard.style.opacity = '0';
-    summaryCard.style.transform = 'translateX(-20px)';
-    summaryCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  // Add event listeners
+  const closeModal = modal.querySelector(".close-modal");
+  const cancelBtn = modal.querySelector(".cancel-btn");
+  const confirmBtn = modal.querySelector(".confirm-btn");
 
+  const cleanupModal = () => {
+    modal.classList.remove("active");
     setTimeout(() => {
-      summaryCard.remove();
-
-      // Check if there are any summaries left, show empty message if not
-      const summariesList = document.querySelector(".collection-summaries-list");
-      if (summariesList && summariesList.children.length === 0) {
-        summariesList.innerHTML = `
-          <p class="empty-message">No summaries in this collection anymore.</p>
-        `;
+      if (modal.parentNode) {
+        document.body.removeChild(modal);
       }
     }, 300);
-  } catch (error) {
-    console.error('Error removing summary from collection:', error);
-    alert("Error removing summary from collection: " + error.message);
-  }
+  };
+
+  closeModal.addEventListener("click", cleanupModal);
+  cancelBtn.addEventListener("click", cleanupModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      cleanupModal();
+    }
+  });
+
+  confirmBtn.addEventListener("click", async () => {
+    try {
+      // Call the API to remove the summary from the collection
+      const response = await fetch(`${CONFIG.BACKEND_URL}/api/collections/${collectionId}/summaries/${summaryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to remove summary from collection');
+      }
+
+      // Close modal
+      cleanupModal();
+
+      // Remove the summary card from the DOM with animation
+      summaryCard.style.opacity = '0';
+      summaryCard.style.transform = 'translateX(-20px)';
+      summaryCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+      setTimeout(() => {
+        summaryCard.remove();
+
+        // Check if there are any summaries left, show empty message if not
+        const summariesList = document.querySelector(".collection-summaries-list");
+        if (summariesList && summariesList.children.length === 0) {
+          summariesList.innerHTML = `
+            <p class="empty-message">No summaries in this collection anymore.</p>
+          `;
+        }
+      }, 300);
+    } catch (error) {
+      console.error('Error removing summary from collection:', error);
+      cleanupModal();
+      alert("Error removing summary from collection: " + error.message);
+    }
+  });
 }
 
 function formatDate(date) {

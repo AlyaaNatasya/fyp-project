@@ -30,7 +30,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -50,7 +50,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 /* Welcome Section */
@@ -147,7 +148,7 @@
 }
 
 #calendar .day:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-bg);
 }
 
 #calendar .today {
@@ -200,7 +201,7 @@
 
 .reminder-card i {
   font-size: 1.5rem;
-  color: #a67c52;
+  color: var(--primary-color);
 }
 
 .reminder-info {
@@ -230,8 +231,7 @@
 }
 
 .btn-icon:hover {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--primary-bg);
   transform: translateY(-2px);
 }
 
@@ -298,6 +298,20 @@
   color: black;
 }
 
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: black;
+}
+
 .modal-content label {
   display: block;
   margin-bottom: 5px;
@@ -341,7 +355,62 @@
 }
 
 .modal-content button[type="submit"]:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-bg);
+}
+
+/* Delete Confirmation Modal Styles */
+.delete-modal .modal-content {
+  text-align: center;
+}
+
+.delete-modal .modal-content h3 {
+  margin: 0 0 15px 0;
+  color: var(--text-dark);
+  font-size: 1.5rem;
+}
+
+.delete-modal .modal-content p {
+  margin: 0 0 20px 0;
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  flex: 1;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #d0d0d0;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  flex: 1;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
 }
 
 /* Responsive Design */

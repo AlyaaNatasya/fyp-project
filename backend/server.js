@@ -10,6 +10,7 @@ const authRoutes = require("./routes/authRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
+const userRoutes = require("./routes/userRoutes");
 const { startReminderScheduler } = require("./schedulers/reminderScheduler");
 
 const app = express();
@@ -86,6 +87,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/collections", collectionRoutes);
+app.use("/api/users", userRoutes);
 
 // Serve static files from the 'frontend' directory
 // This should come after API routes but before any catch-all routes

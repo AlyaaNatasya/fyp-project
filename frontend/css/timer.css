@@ -30,7 +30,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -50,7 +50,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 /* Welcome Section */
@@ -124,7 +125,7 @@
 
 .mode-card:hover {
   transform: translateY(-5px);
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
 }
 
 /* Timer Screen */
@@ -192,7 +193,7 @@
 }
 
 .start:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
 }
 
 .reset {
@@ -215,7 +216,7 @@
 }
 
 .back-btn:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 

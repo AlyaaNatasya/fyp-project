@@ -243,49 +243,98 @@ async function removeSummaryFromCollection(
 }
 
 async function deleteCollection(collectionId, collectionElement) {
-  try {
-    // Call the API to delete the collection
-    const response = await fetch(
-      `${CONFIG.BACKEND_URL}/api/collections/${collectionId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+  // Create confirmation modal
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Delete Collection</h3>
+      <p>Are you sure you want to delete this collection? This will also delete all summaries in this collection.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+        <button type="button" class="btn-primary confirm-btn">Delete</button>
+      </div>
+    </div>
+  `;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to delete collection");
-    }
+  document.body.appendChild(modal);
 
-    // Remove the collection element from the DOM with animation
-    collectionElement.style.opacity = "0";
-    collectionElement.style.transform = "translateX(-20px)";
-    collectionElement.style.transition =
-      "opacity 0.3s ease, transform 0.3s ease";
+  // Show modal
+  modal.classList.add("active");
 
+  // Add event listeners
+  const closeModal = modal.querySelector(".close-modal");
+  const cancelBtn = modal.querySelector(".cancel-btn");
+  const confirmBtn = modal.querySelector(".confirm-btn");
+
+  const cleanupModal = () => {
+    modal.classList.remove("active");
     setTimeout(() => {
-      collectionElement.remove();
-
-      // Check if there are any collections left, show empty message if not
-      const notesList = document.querySelector(".notes-list");
-      if (notesList && notesList.children.length === 0) {
-        notesList.innerHTML = `
-          <p class="empty-message">No collections created yet. Add your first collection using the button above.</p>
-        `;
-      }
-
-      // Refresh sidebar collections
-      if (typeof loadSidebarCollections === "function") {
-        loadSidebarCollections();
+      if (modal.parentNode) {
+        document.body.removeChild(modal);
       }
     }, 300);
-  } catch (error) {
-    console.error("Error deleting collection:", error);
-    alert("Error deleting collection: " + error.message);
-  }
+  };
+
+  closeModal.addEventListener("click", cleanupModal);
+  cancelBtn.addEventListener("click", cleanupModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      cleanupModal();
+    }
+  });
+
+  confirmBtn.addEventListener("click", async () => {
+    try {
+      // Call the API to delete the collection
+      const response = await fetch(
+        `${CONFIG.BACKEND_URL}/api/collections/${collectionId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete collection");
+      }
+
+      // Close modal
+      cleanupModal();
+
+      // Remove the collection element from the DOM with animation
+      collectionElement.style.opacity = "0";
+      collectionElement.style.transform = "translateX(-20px)";
+      collectionElement.style.transition =
+        "opacity 0.3s ease, transform 0.3s ease";
+
+      setTimeout(() => {
+        collectionElement.remove();
+
+        // Check if there are any collections left, show empty message if not
+        const notesList = document.querySelector(".notes-list");
+        if (notesList && notesList.children.length === 0) {
+          notesList.innerHTML = `
+            <p class="empty-message">No collections created yet. Add your first collection using the button above.</p>
+          `;
+        }
+
+        // Refresh sidebar collections
+        if (typeof loadSidebarCollections === "function") {
+          loadSidebarCollections();
+        }
+      }, 300);
+    } catch (error) {
+      console.error("Error deleting collection:", error);
+      cleanupModal();
+      alert("Error deleting collection: " + error.message);
+    }
+  });
 }
 
 function formatDate(date) {

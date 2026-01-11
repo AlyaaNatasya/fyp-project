@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    theme_color VARCHAR(20) DEFAULT '#c1946e',
+    background_color VARCHAR(20) DEFAULT '#fee3c3',
     created_at TIMESTAMP NOT NULL DEFAULT current_timestamp(),
     PRIMARY KEY (id),
     UNIQUE KEY email (email)
@@ -98,3 +100,20 @@ CREATE TABLE IF NOT EXISTS password_resets (
 -- Create index for password_resets
 CREATE INDEX idx_email_otp ON password_resets(email, otp);
 CREATE INDEX idx_expires_at ON password_resets(expires_at);
+
+-- Create email_updates table for email change OTP verification
+CREATE TABLE IF NOT EXISTS email_updates (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    current_email VARCHAR(100) NOT NULL,
+    new_email VARCHAR(100) NOT NULL,
+    otp VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create index for email_updates
+CREATE INDEX idx_user_id_email_updates ON email_updates(user_id);
+CREATE INDEX idx_expires_at_email_updates ON email_updates(expires_at);

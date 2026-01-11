@@ -30,7 +30,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -50,7 +50,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 /* Welcome Section */
@@ -112,7 +113,7 @@
 }
 
 .choose-file-btn:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
 }
 
 /* File Input */
@@ -134,7 +135,7 @@
 }
 
 .generate-btn:hover {
-  background-color: #a67c52;
+  background-color: var(--primary-dark);
 }
 
 /* Responsive Design */

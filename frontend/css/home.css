@@ -118,6 +118,7 @@
 .feature-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  background-color: var(--primary-dark);
 }
 
 .feature-card i {
@@ -210,6 +211,7 @@
 .read-more-modal-content .feature-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  background-color: var(--primary-dark);
 }
 
 .read-more-modal-content .feature-card i {

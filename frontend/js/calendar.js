@@ -526,7 +526,51 @@ function deleteReminder(id) {
     return;
   }
 
-  if (confirm("Are you sure you want to delete this reminder?")) {
+  // Create confirmation modal
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+  modal.classList.add("delete-modal");
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Delete Reminder</h3>
+      <p>Are you sure you want to delete this reminder?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+        <button type="button" class="btn-primary confirm-btn">Delete</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Show modal
+  modal.classList.add("active");
+
+  // Add event listeners
+  const closeModal = modal.querySelector(".close-modal");
+  const cancelBtn = modal.querySelector(".cancel-btn");
+  const confirmBtn = modal.querySelector(".confirm-btn");
+
+  const cleanupModal = () => {
+    modal.classList.remove("active");
+    setTimeout(() => {
+      if (modal.parentNode) {
+        document.body.removeChild(modal);
+      }
+    }, 300);
+  };
+
+  closeModal.addEventListener("click", cleanupModal);
+  cancelBtn.addEventListener("click", cleanupModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      cleanupModal();
+    }
+  });
+
+  confirmBtn.addEventListener("click", () => {
     fetch(`${CONFIG.BACKEND_URL}/api/reminders/${id}`, {
       method: "DELETE",
       headers: {
@@ -538,17 +582,20 @@ function deleteReminder(id) {
     .then(data => {
       if (data.success) {
         console.log("Reminder deleted successfully");
+        cleanupModal();
         loadReminders(); // Reload reminders after deletion
       } else {
         console.error("Failed to delete reminder:", data.message);
+        cleanupModal();
         alert(data.message || "Failed to delete reminder");
       }
     })
     .catch(error => {
       console.error("Error deleting reminder:", error);
+      cleanupModal();
       alert("Error deleting reminder");
     });
-  }
+  });
 }
 
 // --- Calendar Logic ---

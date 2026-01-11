@@ -30,7 +30,7 @@
 }
 
 .menu-toggle:hover {
-  color: #a67c52;
+  color: var(--primary-dark);
 }
 
 .header h1 {
@@ -50,7 +50,8 @@
 }
 
 .logout-btn:hover {
-  background-color: #f8d5a3;
+  background-color: var(--primary-dark);
+  color: white;
 }
 
 /* Welcome Section */
@@ -198,7 +199,7 @@
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  border-color: #d4a86a;
+  border-color: var(--primary-dark);
 }
 
 .card h3 {
