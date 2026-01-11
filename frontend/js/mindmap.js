@@ -43,47 +43,59 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Initialize the mind map page
 function initMindMap() {
-  // Wait for back button to exist (content is injected by main.js)
-  const backBtnCheck = setInterval(() => {
+  // Wait for back button and canvas to exist (content is injected by main.js)
+  const contentCheck = setInterval(() => {
     const backBtn = document.querySelector(".back-to-summary-btn");
-    if (backBtn) {
-      clearInterval(backBtnCheck);
+    const canvas = document.querySelector(".mindmap-canvas");
+    
+    if (backBtn && canvas) {
+      clearInterval(contentCheck);
+      
+      // Setup back button
       backBtn.addEventListener("click", function () {
-        window.location.href = "summary.html";
+        // Retrieve the summaryId from localStorage to return to the correct summary
+        const summaryId = localStorage.getItem("studybloom-last-summaryId");
+        if (summaryId) {
+          window.location.href = `summary.html?summaryId=${summaryId}`;
+        } else {
+          window.location.href = "summary.html";
+        }
       });
+
+      // Optional: Retrieve last summary
+      const lastSummary = localStorage.getItem("studybloom-last-summary");
+
+      if (lastSummary && lastSummary.trim() !== "") {
+        console.log("Last summary loaded for mind map generation:", lastSummary);
+        // Generate mind map from the last summary automatically
+        generateMindMapFromText(lastSummary);
+      } else {
+        // Show a message that no summary is available
+        const summaryId = localStorage.getItem("studybloom-last-summaryId");
+        const summaryUrl = summaryId ? `summary.html?summaryId=${summaryId}` : "summary.html";
+        canvas.innerHTML = `
+          <div class="no-content-message">
+            <h3>No Summary Available</h3>
+            <p>Go back to the summary page to generate a summary first, then click "Generate Mind Map"</p>
+            <button class="auth-btn" onclick="window.location.href='${summaryUrl}'">Go to Summary Page</button>
+          </div>
+        `;
+      }
     }
   }, 100);
-
-  // Optional: Retrieve last summary
-  const lastSummary = localStorage.getItem("studybloom-last-summary");
-
-  if (lastSummary && lastSummary.trim() !== "") {
-    console.log("Last summary loaded for mind map generation:", lastSummary);
-    // Generate mind map from the last summary automatically
-    generateMindMapFromText(lastSummary);
-  } else {
-    // Show a message that no summary is available
-    const canvas = document.querySelector(".mindmap-canvas");
-    if (canvas) {
-      canvas.innerHTML = `
-        <div class="no-content-message">
-          <h3>No Summary Available</h3>
-          <p>Go back to the summary page to generate a summary first, then click "Generate Mind Map"</p>
-          <button class="auth-btn" onclick="window.location.href='summary.html'">Go to Summary Page</button>
-        </div>
-      `;
-    }
-  }
 }
 
 // Function to generate mind map from text
 async function generateMindMapFromText(text) {
-  // Show loading state
+  // Show loading state with progress bar
   const canvas = document.querySelector(".mindmap-canvas");
   if (canvas) {
     canvas.innerHTML = `
       <div class="loading-container">
         <div class="spinner"></div>
+        <div class="loading-progress">
+          <div class="loading-progress-bar"></div>
+        </div>
         <p>Generating mind map...</p>
       </div>
     `;

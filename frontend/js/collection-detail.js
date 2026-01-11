@@ -39,7 +39,7 @@ function initCollectionDetailPage() {
 
     const name = payload.name || payload.email?.split("@")[0] || "Student";
     if (usernameSpan) {
-      usernameSpan.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+      usernameSpan.textContent = name;
     }
   } catch (err) {
     console.warn("Invalid token:", err);

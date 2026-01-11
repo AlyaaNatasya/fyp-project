@@ -39,7 +39,7 @@ function initSummaryPage() {
 
     const name = payload.name || payload.email?.split("@")[0] || "Student";
     if (usernameSpan) {
-      usernameSpan.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+      usernameSpan.textContent = name;
     }
   } catch (err) {
     console.warn("Invalid token:", err);
@@ -1052,6 +1052,13 @@ function initSummaryPage() {
 
   // Generate Mind Map → Go to Mind Map Page
   mindmapBtn?.addEventListener("click", () => {
+    // Store summaryId for returning to the correct summary
+    const urlParams = new URLSearchParams(window.location.search);
+    const summaryId = urlParams.get("summaryId");
+    if (summaryId) {
+      localStorage.setItem("studybloom-last-summaryId", summaryId);
+    }
+
     // Optionally save the summary first
     const summaryText = summaryOutput.innerText.trim();
     localStorage.setItem("studybloom-last-summary", summaryText);
