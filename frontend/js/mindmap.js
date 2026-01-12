@@ -793,15 +793,49 @@ async function handleExportPDF() {
     // Wait a moment to ensure the mind map is fully rendered
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Capture the mind map canvas
+    // Get the original SVG and content group
     const canvasElement = canvas.querySelector("svg");
+    const contentGroup = canvasElement ? canvasElement.querySelector(".mindmap-content") : null;
 
-    if (!canvasElement) {
-      throw new Error("Mind map SVG not found");
+    if (!canvasElement || !contentGroup) {
+      throw new Error("Mind map SVG or content not found");
     }
 
-    // Get the SVG content
-    const svgData = new XMLSerializer().serializeToString(canvasElement);
+    // Get the bounding box of the content (untransformed)
+    const bbox = contentGroup.getBBox();
+
+    // Clone the SVG to manipulate it without affecting the display
+    const clonedSvg = canvasElement.cloneNode(true);
+    const clonedContentGroup = clonedSvg.querySelector(".mindmap-content");
+
+    // Remove the transform (zoom/pan) from the cloned content group to get raw layout
+    clonedContentGroup.removeAttribute("transform");
+
+    // Add padding around the content
+    const padding = 50;
+    const x = bbox.x - padding;
+    const y = bbox.y - padding;
+    const width = bbox.width + (padding * 2);
+    const height = bbox.height + (padding * 2);
+
+    // Update the viewBox of the cloned SVG to match the content's bounding box
+    clonedSvg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    
+    // Set explicit width and height to match content size
+    clonedSvg.setAttribute("width", width);
+    clonedSvg.setAttribute("height", height);
+
+    // Adjust the background rectangle to cover the new viewBox
+    const backgroundRect = clonedSvg.querySelector('rect[fill*="mindmapBackground"]');
+    if (backgroundRect) {
+      backgroundRect.setAttribute("x", x);
+      backgroundRect.setAttribute("y", y);
+      backgroundRect.setAttribute("width", width);
+      backgroundRect.setAttribute("height", height);
+    }
+
+    // Serialize the CLONED SVG
+    const svgData = new XMLSerializer().serializeToString(clonedSvg);
     const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(svgBlob);
 
@@ -812,21 +846,16 @@ async function handleExportPDF() {
       const tempCanvas = document.createElement("canvas");
       const ctx = tempCanvas.getContext("2d");
 
-      // Get the SVG dimensions
-      const svgRect = canvasElement.getBoundingClientRect();
-      const width = svgRect.width || 1200;
-      const height = svgRect.height || 800;
+      // Set canvas dimensions to match the full content size
+      tempCanvas.width = width;
+      tempCanvas.height = height;
 
-      // Set canvas dimensions (add some padding)
-      tempCanvas.width = width + 100;
-      tempCanvas.height = height + 100;
-
-      // Fill with white background
+      // Fill with white background (as a fallback)
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
       // Draw the SVG image
-      ctx.drawImage(img, 50, 50, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
 
       // Get the image data
       const imageData = tempCanvas.toDataURL("image/png");
@@ -836,11 +865,11 @@ async function handleExportPDF() {
       const pdf = new jsPDF({
         orientation: width > height ? "landscape" : "portrait",
         unit: "px",
-        format: [width + 100, height + 100],
+        format: [width, height],
       });
 
       // Add the image to PDF
-      pdf.addImage(imageData, "PNG", 0, 0, width + 100, height + 100);
+      pdf.addImage(imageData, "PNG", 0, 0, width, height);
 
       // Save the PDF
       const filename = `mindmap_${Date.now()}.pdf`;
