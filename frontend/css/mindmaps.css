@@ -328,6 +328,7 @@
 .info-item {
   display: flex;
   justify-content: center;
+  gap: 8px;
   padding: 12px 0;
   border-bottom: 1px solid #f3f4f6;
 }
@@ -349,6 +350,7 @@
 .modal-actions {
   display: flex;
   gap: 12px;
+  justify-content: center;
 }
 
 .btn-primary,

@@ -57,13 +57,25 @@ function initMindMap() {
       clearInterval(contentCheck);
 
       // Setup back button
+      const urlParams = new URLSearchParams(window.location.search);
+      const mindmapId = urlParams.get("mindmapId");
+
+      if (mindmapId) {
+        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Mind Maps';
+      }
+
       backBtn.addEventListener("click", function () {
-        // Retrieve the summaryId from localStorage to return to the correct summary
-        const summaryId = localStorage.getItem("studybloom-last-summaryId");
-        if (summaryId) {
-          window.location.href = `summary.html?summaryId=${summaryId}`;
+        if (mindmapId) {
+          // If viewing a saved mind map, go back to the list
+          window.location.href = "mindmaps.html";
         } else {
-          window.location.href = "summary.html";
+          // If generating a new mind map, go back to the summary
+          const summaryId = localStorage.getItem("studybloom-last-summaryId");
+          if (summaryId) {
+            window.location.href = `summary.html?summaryId=${summaryId}`;
+          } else {
+            window.location.href = "summary.html";
+          }
         }
       });
 
@@ -141,8 +153,7 @@ function initMindMap() {
       }
 
       // Check if mindmapId is provided in URL (loading saved mind map)
-      const urlParams = new URLSearchParams(window.location.search);
-      const mindmapId = urlParams.get("mindmapId");
+      // Variables urlParams and mindmapId are already defined above
 
       if (mindmapId) {
         // Load saved mind map from database
