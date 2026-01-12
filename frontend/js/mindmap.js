@@ -77,6 +77,69 @@ function initMindMap() {
         exportBtn.addEventListener("click", handleExportPDF);
       }
 
+      // Setup Export Success Modal
+      const exportModal = document.getElementById("exportSuccessModal");
+      const closeExportBtn = document.getElementById("closeExportModal");
+      const exportOkBtn = document.getElementById("exportOkBtn");
+
+      if (exportModal) {
+        const closeExport = () => {
+          exportModal.style.display = "none";
+        };
+
+        if (closeExportBtn) closeExportBtn.addEventListener("click", closeExport);
+        if (exportOkBtn) exportOkBtn.addEventListener("click", closeExport);
+
+        // Close modal when clicking outside
+        window.addEventListener("click", (event) => {
+          if (event.target === exportModal) {
+            closeExport();
+          }
+        });
+      }
+
+      // Setup Save Mind Map Modal
+      const saveModal = document.getElementById("saveMindMapModal");
+      const closeSaveBtn = document.getElementById("closeSaveModal");
+      const cancelSaveBtn = document.getElementById("cancelSaveBtn");
+      const confirmSaveBtn = document.getElementById("confirmSaveBtn");
+
+      if (saveModal) {
+        const closeSave = () => {
+          saveModal.style.display = "none";
+        };
+
+        if (closeSaveBtn) closeSaveBtn.addEventListener("click", closeSave);
+        if (cancelSaveBtn) cancelSaveBtn.addEventListener("click", closeSave);
+        if (confirmSaveBtn) confirmSaveBtn.addEventListener("click", performSaveMindMap);
+
+        window.addEventListener("click", (event) => {
+          if (event.target === saveModal) {
+            closeSave();
+          }
+        });
+      }
+
+      // Setup Save Success Modal
+      const saveSuccessModal = document.getElementById("saveSuccessModal");
+      const closeSaveSuccessBtn = document.getElementById("closeSaveSuccessModal");
+      const saveOkBtn = document.getElementById("saveOkBtn");
+
+      if (saveSuccessModal) {
+        const closeSaveSuccess = () => {
+          saveSuccessModal.style.display = "none";
+        };
+
+        if (closeSaveSuccessBtn) closeSaveSuccessBtn.addEventListener("click", closeSaveSuccess);
+        if (saveOkBtn) saveOkBtn.addEventListener("click", closeSaveSuccess);
+
+        window.addEventListener("click", (event) => {
+          if (event.target === saveSuccessModal) {
+            closeSaveSuccess();
+          }
+        });
+      }
+
       // Check if mindmapId is provided in URL (loading saved mind map)
       const urlParams = new URLSearchParams(window.location.search);
       const mindmapId = urlParams.get("mindmapId");
@@ -693,14 +756,40 @@ function renderMindMap(mindMapData) {
 
 }
 
-// Function to save mind map to database
-async function handleSaveMindMap() {
+// Function to show save mind map modal
+function handleSaveMindMap() {
   if (!currentMindMapData) {
     alert("No mind map to save. Please generate a mind map first.");
     return;
   }
 
   // Check if we're editing an existing mind map
+  const urlParams = new URLSearchParams(window.location.search);
+  const existingMindmapId = urlParams.get("mindmapId");
+
+  const saveModal = document.getElementById("saveMindMapModal");
+  const titleInput = document.getElementById("mindmapTitleInput");
+  const saveModalTitle = document.getElementById("saveModalTitle");
+
+  if (saveModal && titleInput) {
+    // Pre-fill logic if needed, or clear input
+    if (existingMindmapId) {
+      saveModalTitle.textContent = "Update Mind Map Title";
+      titleInput.value = "My Mind Map"; // Ideally fetch the current title if available
+    } else {
+      saveModalTitle.textContent = "Save Mind Map";
+      titleInput.value = "My Mind Map";
+    }
+    saveModal.style.display = "flex";
+  } else {
+    // Fallback if modal not found
+    performSaveMindMapLegacy();
+  }
+}
+
+// Legacy function for fallback
+async function performSaveMindMapLegacy() {
+    // Check if we're editing an existing mind map
   const urlParams = new URLSearchParams(window.location.search);
   const existingMindmapId = urlParams.get("mindmapId");
 
@@ -714,12 +803,36 @@ async function handleSaveMindMap() {
     alert("Please enter a title for your mind map.");
     return;
   }
+  
+  await executeSave(title);
+}
 
+// Function to perform the actual save operation
+async function performSaveMindMap() {
+  const titleInput = document.getElementById("mindmapTitleInput");
+  const title = titleInput ? titleInput.value : null;
+
+  if (!title || title.trim() === "") {
+    alert("Please enter a title for your mind map.");
+    return;
+  }
+
+  const saveModal = document.getElementById("saveMindMapModal");
+  if (saveModal) saveModal.style.display = "none";
+
+  await executeSave(title);
+}
+
+// Shared save logic
+async function executeSave(title) {
   const token = localStorage.getItem("token");
   if (!token) {
     alert("Please log in to save your mind map.");
     return;
   }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const existingMindmapId = urlParams.get("mindmapId");
 
   try {
     let response;
@@ -742,7 +855,7 @@ async function handleSaveMindMap() {
       data = await response.json();
 
       if (data.success) {
-        alert("Mind map updated successfully!");
+        showSaveSuccess();
       } else {
         alert("Failed to update mind map: " + (data.message || "Unknown error"));
       }
@@ -764,7 +877,7 @@ async function handleSaveMindMap() {
       data = await response.json();
 
       if (data.success) {
-        alert("Mind map saved successfully!");
+        showSaveSuccess();
       } else {
         alert("Failed to save mind map: " + (data.message || "Unknown error"));
       }
@@ -772,6 +885,15 @@ async function handleSaveMindMap() {
   } catch (error) {
     console.error("Error saving mind map:", error);
     alert("Error saving mind map. Please try again.");
+  }
+}
+
+function showSaveSuccess() {
+  const successModal = document.getElementById("saveSuccessModal");
+  if (successModal) {
+    successModal.style.display = "flex";
+  } else {
+    alert("Mind map saved successfully!");
   }
 }
 
@@ -882,7 +1004,13 @@ async function handleExportPDF() {
       if (saveBtn) saveBtn.disabled = false;
       if (exportBtn) exportBtn.disabled = false;
 
-      alert("Mind map exported successfully!");
+      // Show success modal
+      const exportModal = document.getElementById("exportSuccessModal");
+      if (exportModal) {
+        exportModal.style.display = "flex";
+      } else {
+        alert("Mind map exported successfully!");
+      }
     };
 
     img.onerror = function() {

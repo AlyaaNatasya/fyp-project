@@ -58,6 +58,64 @@
               <!-- Future mind map will be rendered here -->
             </div>
           </div>
+
+          <!-- Export Success Modal -->
+          <div class="modal" id="exportSuccessModal" style="display: none;">
+            <div class="modal-content" style="max-width: 400px;">
+              <span class="close-modal" id="closeExportModal">&times;</span>
+              <div class="modal-header" style="text-align: center; border-bottom: none;">
+                <h3>Export Successful!</h3>
+              </div>
+              <div class="modal-body">
+                <div class="success-icon" style="text-align: center; margin-bottom: 20px;">
+                  <i class="fas fa-check-circle" style="font-size: 50px; color: #22c55e;"></i>
+                </div>
+                <p style="text-align: center; font-size: 1.1em; color: #4b5563;">Your mind map has been successfully exported as a PDF.</p>
+              </div>
+              <div class="modal-actions" style="display: flex; justify-content: center; margin-top: 20px; padding: 0;">
+                <button class="mindmap-btn save-btn" id="exportOkBtn" style="min-width: 120px; margin: 0; justify-content: center;">OK</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Mind Map Modal -->
+          <div class="modal" id="saveMindMapModal" style="display: none;">
+            <div class="modal-content" style="max-width: 400px;">
+              <span class="close-modal" id="closeSaveModal">&times;</span>
+              <div class="modal-header" style="text-align: center; border-bottom: none;">
+                <h3 id="saveModalTitle">Save Mind Map</h3>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="mindmapTitleInput" style="display: block; margin-bottom: 8px; font-weight: 500; text-align: left;">Title</label>
+                  <input type="text" id="mindmapTitleInput" placeholder="Enter mind map title">
+                </div>
+              </div>
+              <div class="modal-actions" style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding: 0;">
+                 <button class="mindmap-btn" id="cancelSaveBtn" style="background-color: #6b7280; justify-content: center; min-width: 100px;">Cancel</button>
+                 <button class="mindmap-btn save-btn" id="confirmSaveBtn" style="justify-content: center; min-width: 100px;">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Success Modal -->
+          <div class="modal" id="saveSuccessModal" style="display: none;">
+            <div class="modal-content" style="max-width: 400px;">
+              <span class="close-modal" id="closeSaveSuccessModal">&times;</span>
+              <div class="modal-header" style="text-align: center; border-bottom: none;">
+                <h3>Success!</h3>
+              </div>
+              <div class="modal-body">
+                <div class="success-icon" style="text-align: center; margin-bottom: 20px;">
+                  <i class="fas fa-check-circle" style="font-size: 50px; color: #22c55e;"></i>
+                </div>
+                <p style="text-align: center; font-size: 1.1em; color: #4b5563;">Your mind map has been saved successfully.</p>
+              </div>
+              <div class="modal-actions" style="display: flex; justify-content: center; margin-top: 20px; padding: 0;">
+                <button class="mindmap-btn save-btn" id="saveOkBtn" style="min-width: 120px; margin: 0; justify-content: center;">OK</button>
+              </div>
+            </div>
+          </div>
         </div>
       </script>
     </div>
