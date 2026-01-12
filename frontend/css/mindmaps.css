@@ -73,7 +73,7 @@
 
 .welcome-section p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #000000;
   margin-top: 5px;
 }
 
@@ -85,7 +85,7 @@
 
 .mindmaps-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 30px;
   flex-wrap: wrap;
@@ -94,7 +94,7 @@
 
 .search-container {
   position: relative;
-  flex: 1;
+
   max-width: 400px;
 }
 
@@ -137,25 +137,14 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 2px solid transparent;
   position: relative;
   overflow: hidden;
 }
 
-.mindmap-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
-}
-
 .mindmap-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-  border-color: var(--primary-color);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background-color: #fffaf5;
 }
 
 .mindmap-card-header {
@@ -168,7 +157,11 @@
 .mindmap-icon {
   width: 50px;
   height: 50px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-dark) 100%
+  );
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -334,7 +327,7 @@
 
 .info-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding: 12px 0;
   border-bottom: 1px solid #f3f4f6;
 }
@@ -361,7 +354,6 @@
 .btn-primary,
 .btn-secondary,
 .btn-danger {
-  flex: 1;
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -376,7 +368,11 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-dark) 100%
+  );
   color: white;
 }
 
@@ -412,7 +408,7 @@
   background-color: #fee2e2;
   border-bottom: 2px solid #fca5a5;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
@@ -454,45 +450,8 @@
   justify-content: center;
 }
 
-/* Success/Error Messages */
-.success-message,
-.error-message {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 25px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 1001;
-  animation: slideInRight 0.3s ease;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.success-message {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #34d399;
-}
-
-.error-message {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #f87171;
-}
-
-/* Responsive Design */
+/* Success/Error Messages removed */
+\n\n/* Responsive Design */
 @media (max-width: 1024px) {
   .main-content {
     margin-left: 0;
@@ -508,22 +467,6 @@
   .main-content {
     margin-left: 0;
     padding: 15px 20px;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-    padding: 20px 0;
-  }
-
-  .menu-toggle {
-    align-self: flex-start;
-  }
-
-  .logout-btn {
-    width: 100%;
-    text-align: center;
   }
 
   .mindmaps-header {
@@ -552,6 +495,21 @@
 @media (max-width: 576px) {
   .main-content {
     padding: 10px 15px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .menu-toggle {
+    align-self: flex-start;
+  }
+
+  .logout-btn {
+    width: 100%;
+    text-align: center;
   }
 
   .header h1 {

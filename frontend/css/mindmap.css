@@ -406,6 +406,52 @@
     sans-serif;
 }
 
+/* === Custom Modal Styles (Moved from Inline) === */
+.custom-modal-content {
+  max-width: 400px;
+}
+
+.custom-modal-header {
+  text-align: center;
+  border-bottom: none;
+}
+
+.success-icon {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.custom-modal-text {
+  text-align: center;
+  font-size: 1.1em;
+  color: #4b5563;
+}
+
+.custom-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 0;
+  gap: 15px;
+}
+
+.btn-centered {
+  min-width: 120px;
+  margin: 0;
+  justify-content: center;
+}
+
+.btn-cancel {
+  background-color: #6b7280;
+  justify-content: center;
+  min-width: 100px;
+}
+
+.btn-confirm {
+  justify-content: center;
+  min-width: 100px;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .main-content {

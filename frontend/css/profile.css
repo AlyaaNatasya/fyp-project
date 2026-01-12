@@ -107,8 +107,9 @@
   color: var(--primary-color);
 }
 
-/* Current Email Display */
-.current-email {
+/* Current Email & Username Display */
+.current-email,
+.current-username {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -119,15 +120,26 @@
   border: 1px solid #e0e0e0;
 }
 
-.current-email label {
+.current-email label,
+.current-username label {
   font-weight: 600;
   color: var(--text-dark);
   font-size: 0.95rem;
 }
 
-.current-email span {
+.current-email span,
+.current-username span {
   color: var(--primary-color);
   font-weight: 500;
+}
+
+/* Specific spacing for Username section */
+.current-username + .form-group {
+  margin-top: 25px; /* More gap with text above */
+}
+
+#updateUsernameBtn {
+  margin-top: -10px; /* Less gap with text box above */
 }
 
 /* Form Group */
@@ -193,15 +205,15 @@
 
 /* Help Text */
 .help-text {
-  color: var(--text-light);
+  color: #666;
   font-size: 0.85rem;
-  margin-top: -10px;
+  margin-top: 5px;
   margin-bottom: 5px;
 }
 
 /* Info Text */
 .info-text {
-  color: var(--text-light);
+  color: #555;
   font-size: 0.95rem;
   margin-bottom: 20px;
   line-height: 1.5;
