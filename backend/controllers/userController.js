@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const { body, validationResult } = require("express-validator");
 require("dotenv").config();
@@ -142,8 +143,8 @@ const updateUserProfile = async (req, res) => {
     updateValues.push(userId);
 
     const updateQuery = `
-      UPDATE users 
-      SET ${updateFields.join(", ")} 
+      UPDATE users
+      SET ${updateFields.join(", ")}
       WHERE id = ?
     `;
 
@@ -151,22 +152,36 @@ const updateUserProfile = async (req, res) => {
 
     // Fetch updated user profile
     const [updatedUsers] = await pool.execute(
-      `SELECT 
+      `SELECT
         id,
         name,
         email,
         theme_color,
         background_color,
         created_at
-       FROM users 
+       FROM users
        WHERE id = ?`,
       [userId]
+    );
+
+    const updatedUser = updatedUsers[0];
+
+    // Generate new JWT token with updated name
+    const newToken = jwt.sign(
+      {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
     res.json({
       success: true,
       message: "Profile updated successfully",
-      user: updatedUsers[0],
+      user: updatedUser,
+      token: newToken,
     });
   } catch (err) {
     console.error("Update user profile error:", err);

@@ -49,6 +49,9 @@ function populateProfileForm(user) {
   document.getElementById("profileName").textContent = user.name;
   document.getElementById("profileEmail").textContent = user.email;
 
+  // Update current username display
+  document.getElementById("currentUsernameDisplay").textContent = user.name;
+
   // Update current email display
   document.getElementById("currentEmailDisplay").textContent = user.email;
 
@@ -91,6 +94,12 @@ function populateProfileForm(user) {
 
 // Setup event listeners
 function setupEventListeners() {
+  // Update username button
+  const updateUsernameBtn = document.getElementById("updateUsernameBtn");
+  if (updateUsernameBtn) {
+    updateUsernameBtn.addEventListener("click", handleUpdateUsername);
+  }
+
   // Theme color picker
   const themeColorInput = document.getElementById("themeColor");
   const themeColorValueSpan = document.querySelectorAll(".color-value")[0];
@@ -164,6 +173,11 @@ function handleSaveTheme() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
+      // Save new token
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
       // Update local storage
       localStorage.setItem("userThemeColor", themeColor);
       localStorage.setItem("userBackgroundColor", backgroundColor);
@@ -181,6 +195,69 @@ function handleSaveTheme() {
   .catch(error => {
     console.error("Error saving theme:", error);
     showError("Error saving theme. Please try again.");
+  })
+  .finally(() => {
+    hideLoading();
+  });
+}
+
+// Handle update username
+function handleUpdateUsername() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    showError("Please log in to update your username");
+    return;
+  }
+
+  const newUsername = document.getElementById("newUsername").value.trim();
+
+  if (!newUsername) {
+    showError("Please enter a new username");
+    return;
+  }
+
+  if (newUsername.length < 2 || newUsername.length > 50) {
+    showError("Username must be between 2 and 50 characters");
+    return;
+  }
+
+  showLoading("Updating username...");
+
+  fetch(`${CONFIG.BACKEND_URL}/api/users/profile`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name: newUsername })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Save new token with updated username
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      showSuccess("Username updated successfully!");
+
+      // Clear form
+      document.getElementById("newUsername").value = "";
+
+      // Reload profile after 2 seconds to update displays
+      setTimeout(() => {
+        loadUserProfile();
+        // Reload page to update username in sidebar
+        window.location.reload();
+      }, 2000);
+    } else {
+      console.error("Failed to update username:", data.message);
+      showError("Error updating username: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(error => {
+    console.error("Error updating username:", error);
+    showError("Error updating username. Please try again.");
   })
   .finally(() => {
     hideLoading();

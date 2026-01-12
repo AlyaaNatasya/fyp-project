@@ -11,6 +11,7 @@ const reminderRoutes = require("./routes/reminderRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const userRoutes = require("./routes/userRoutes");
+const mindmapRoutes = require("./routes/mindmapRoutes");
 const { startReminderScheduler } = require("./schedulers/reminderScheduler");
 
 const app = express();
@@ -62,7 +63,7 @@ app.use(
         scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://d3js.org", "https://cdn.jsdelivr.net"],
         workerSrc: ["'self'", "blob:"], // Allow web workers from same origin and blob URLs for PDF.js
         connectSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"], // Allow connections to CDNs for source maps
-        imgSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, and cdnjs
+        imgSrc: ["'self'", "data:", "blob:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, blob URLs, and cdnjs
         styleSrc: [
           "'self'",
           "'unsafe-inline'",
@@ -88,6 +89,7 @@ app.use("/api/reminders", reminderRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api", mindmapRoutes);
 
 // Serve static files from the 'frontend' directory
 // This should come after API routes but before any catch-all routes

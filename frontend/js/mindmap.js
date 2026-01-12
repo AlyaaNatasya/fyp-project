@@ -5,6 +5,9 @@
  * All shared logic (sidebar, auth, hamburger, logout) is in main.js
  */
 
+// Global variable to store current mind map data
+let currentMindMapData = null;
+
 document.addEventListener("DOMContentLoaded", function () {
   const token = localStorage.getItem("token");
   const usernameSpan = document.getElementById("username");
@@ -47,10 +50,12 @@ function initMindMap() {
   const contentCheck = setInterval(() => {
     const backBtn = document.querySelector(".back-to-summary-btn");
     const canvas = document.querySelector(".mindmap-canvas");
-    
+    const saveBtn = document.getElementById("saveMindMapBtn");
+    const exportBtn = document.getElementById("exportPdfBtn");
+
     if (backBtn && canvas) {
       clearInterval(contentCheck);
-      
+
       // Setup back button
       backBtn.addEventListener("click", function () {
         // Retrieve the summaryId from localStorage to return to the correct summary
@@ -62,27 +67,103 @@ function initMindMap() {
         }
       });
 
-      // Optional: Retrieve last summary
-      const lastSummary = localStorage.getItem("studybloom-last-summary");
+      // Setup save button
+      if (saveBtn) {
+        saveBtn.addEventListener("click", handleSaveMindMap);
+      }
 
-      if (lastSummary && lastSummary.trim() !== "") {
-        console.log("Last summary loaded for mind map generation:", lastSummary);
-        // Generate mind map from the last summary automatically
-        generateMindMapFromText(lastSummary);
+      // Setup export button
+      if (exportBtn) {
+        exportBtn.addEventListener("click", handleExportPDF);
+      }
+
+      // Check if mindmapId is provided in URL (loading saved mind map)
+      const urlParams = new URLSearchParams(window.location.search);
+      const mindmapId = urlParams.get("mindmapId");
+
+      if (mindmapId) {
+        // Load saved mind map from database
+        loadSavedMindMap(mindmapId);
       } else {
-        // Show a message that no summary is available
-        const summaryId = localStorage.getItem("studybloom-last-summaryId");
-        const summaryUrl = summaryId ? `summary.html?summaryId=${summaryId}` : "summary.html";
-        canvas.innerHTML = `
-          <div class="no-content-message">
-            <h3>No Summary Available</h3>
-            <p>Go back to the summary page to generate a summary first, then click "Generate Mind Map"</p>
-            <button class="auth-btn" onclick="window.location.href='${summaryUrl}'">Go to Summary Page</button>
-          </div>
-        `;
+        // Optional: Retrieve last summary
+        const lastSummary = localStorage.getItem("studybloom-last-summary");
+
+        if (lastSummary && lastSummary.trim() !== "") {
+          console.log("Last summary loaded for mind map generation:", lastSummary);
+          // Generate mind map from the last summary automatically
+          generateMindMapFromText(lastSummary);
+        } else {
+          // Show a message that no summary is available
+          const summaryId = localStorage.getItem("studybloom-last-summaryId");
+          const summaryUrl = summaryId ? `summary.html?summaryId=${summaryId}` : "summary.html";
+          canvas.innerHTML = `
+            <div class="no-content-message">
+              <h3>No Summary Available</h3>
+              <p>Go back to the summary page to generate a summary first, then click "Generate Mind Map"</p>
+              <button class="auth-btn" onclick="window.location.href='${summaryUrl}'">Go to Summary Page</button>
+            </div>
+          `;
+        }
       }
     }
   }, 100);
+}
+
+// Function to load saved mind map from database
+async function loadSavedMindMap(mindmapId) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please log in to view mind maps.");
+    window.location.href = "home.html";
+    return;
+  }
+
+  const canvas = document.querySelector(".mindmap-canvas");
+  if (canvas) {
+    canvas.innerHTML = `
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-progress">
+          <div class="loading-progress-bar"></div>
+        </div>
+        <p>Loading mind map...</p>
+      </div>
+    `;
+  }
+
+  try {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/api/mindmaps/${mindmapId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.mindmap) {
+      // Store mind map data globally for saving/exporting
+      currentMindMapData = data.mindmap.mindmap_data;
+
+      // Render the mind map with the loaded data
+      renderMindMap(data.mindmap.mindmap_data);
+    } else {
+      throw new Error(data.message || "Failed to load mind map");
+    }
+  } catch (error) {
+    console.error("Error loading saved mind map:", error);
+
+    if (canvas) {
+      canvas.innerHTML = `
+        <div class="error-message">
+          <h3>Error Loading Mind Map</h3>
+          <p>${error.message}</p>
+          <button class="auth-btn" onclick="window.location.href='mindmaps.html'">Back to My Mind Maps</button>
+        </div>
+      `;
+    }
+  }
 }
 
 // Function to generate mind map from text
@@ -114,6 +195,9 @@ async function generateMindMapFromText(text) {
     const data = await response.json();
 
     if (data.success) {
+      // Store mind map data globally for saving/exporting
+      currentMindMapData = data.mindMap;
+
       // Render the mind map with the generated data
       renderMindMap(data.mindMap);
     } else {
@@ -607,4 +691,182 @@ function renderMindMap(mindMapData) {
     });
 
 
+}
+
+// Function to save mind map to database
+async function handleSaveMindMap() {
+  if (!currentMindMapData) {
+    alert("No mind map to save. Please generate a mind map first.");
+    return;
+  }
+
+  // Check if we're editing an existing mind map
+  const urlParams = new URLSearchParams(window.location.search);
+  const existingMindmapId = urlParams.get("mindmapId");
+
+  // Prompt user for mind map title
+  const title = prompt(
+    existingMindmapId ? "Update mind map title:" : "Enter a title for your mind map:",
+    existingMindmapId ? "My Mind Map" : "My Mind Map"
+  );
+
+  if (!title || title.trim() === "") {
+    alert("Please enter a title for your mind map.");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please log in to save your mind map.");
+    return;
+  }
+
+  try {
+    let response;
+    let data;
+
+    if (existingMindmapId) {
+      // Update existing mind map
+      response = await fetch(`${CONFIG.BACKEND_URL}/api/mindmaps/${existingMindmapId}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          mindmap_data: currentMindMapData,
+        }),
+      });
+
+      data = await response.json();
+
+      if (data.success) {
+        alert("Mind map updated successfully!");
+      } else {
+        alert("Failed to update mind map: " + (data.message || "Unknown error"));
+      }
+    } else {
+      // Create new mind map
+      response = await fetch(`${CONFIG.BACKEND_URL}/api/mindmaps`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          mindmap_data: currentMindMapData,
+          summary_id: localStorage.getItem("studybloom-last-summaryId"),
+        }),
+      });
+
+      data = await response.json();
+
+      if (data.success) {
+        alert("Mind map saved successfully!");
+      } else {
+        alert("Failed to save mind map: " + (data.message || "Unknown error"));
+      }
+    }
+  } catch (error) {
+    console.error("Error saving mind map:", error);
+    alert("Error saving mind map. Please try again.");
+  }
+}
+
+// Function to export mind map as PDF
+async function handleExportPDF() {
+  const canvas = document.querySelector(".mindmap-canvas");
+  if (!canvas) {
+    alert("No mind map to export.");
+    return;
+  }
+
+  // Disable buttons during export
+  const saveBtn = document.getElementById("saveMindMapBtn");
+  const exportBtn = document.getElementById("exportPdfBtn");
+  if (saveBtn) saveBtn.disabled = true;
+  if (exportBtn) exportBtn.disabled = true;
+
+  try {
+    // Wait a moment to ensure the mind map is fully rendered
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Capture the mind map canvas
+    const canvasElement = canvas.querySelector("svg");
+
+    if (!canvasElement) {
+      throw new Error("Mind map SVG not found");
+    }
+
+    // Get the SVG content
+    const svgData = new XMLSerializer().serializeToString(canvasElement);
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    // Create an image to render the SVG
+    const img = new Image();
+    img.onload = async function() {
+      // Create a temporary canvas to draw the image
+      const tempCanvas = document.createElement("canvas");
+      const ctx = tempCanvas.getContext("2d");
+
+      // Get the SVG dimensions
+      const svgRect = canvasElement.getBoundingClientRect();
+      const width = svgRect.width || 1200;
+      const height = svgRect.height || 800;
+
+      // Set canvas dimensions (add some padding)
+      tempCanvas.width = width + 100;
+      tempCanvas.height = height + 100;
+
+      // Fill with white background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      // Draw the SVG image
+      ctx.drawImage(img, 50, 50, width, height);
+
+      // Get the image data
+      const imageData = tempCanvas.toDataURL("image/png");
+
+      // Create PDF
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: width > height ? "landscape" : "portrait",
+        unit: "px",
+        format: [width + 100, height + 100],
+      });
+
+      // Add the image to PDF
+      pdf.addImage(imageData, "PNG", 0, 0, width + 100, height + 100);
+
+      // Save the PDF
+      const filename = `mindmap_${Date.now()}.pdf`;
+      pdf.save(filename);
+
+      // Clean up
+      URL.revokeObjectURL(url);
+
+      // Re-enable buttons
+      if (saveBtn) saveBtn.disabled = false;
+      if (exportBtn) exportBtn.disabled = false;
+
+      alert("Mind map exported successfully!");
+    };
+
+    img.onerror = function() {
+      throw new Error("Failed to load SVG image");
+    };
+
+    img.src = url;
+  } catch (error) {
+    console.error("Error exporting PDF:", error);
+    alert("Error exporting PDF: " + error.message);
+
+    // Re-enable buttons
+    if (saveBtn) saveBtn.disabled = false;
+    if (exportBtn) exportBtn.disabled = false;
+  }
 }

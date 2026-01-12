@@ -81,6 +81,35 @@ body {
   font-size: 1.2rem;
 }
 
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: auto;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.sidebar-profile:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.sidebar-profile i {
+  color: var(--primary-bg);
+  transition: var(--transition);
+}
+
+.sidebar-profile:hover i {
+  color: white;
+}
+
 /* New Folder Button */
 .new-folder-btn {
   width: 100%;
@@ -183,6 +212,7 @@ body {
 }
 
 .sidebar.collapsed .sidebar-header h3,
+.sidebar.collapsed .sidebar-profile,
 .sidebar.collapsed .nav-menu li a span,
 .sidebar.collapsed .new-folder-btn,
 .sidebar.collapsed .dropdown-icon,

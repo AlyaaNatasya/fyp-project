@@ -35,6 +35,23 @@
             <p id="profileEmail" class="profile-email">Loading...</p>
           </div>
 
+          <!-- Username Section -->
+          <div class="profile-section">
+            <h4><i class="fas fa-user"></i> Username</h4>
+            <div class="current-username">
+              <label>Current Username:</label>
+              <span id="currentUsernameDisplay">Loading...</span>
+            </div>
+            <div class="form-group">
+              <label for="newUsername">New Username</label>
+              <input type="text" id="newUsername" name="newUsername" placeholder="Enter your new username" required>
+              <small class="help-text">Username must be between 2 and 50 characters</small>
+            </div>
+            <button type="button" class="btn-primary" id="updateUsernameBtn">
+              <i class="fas fa-user-edit"></i> Update Username
+            </button>
+          </div>
+
           <!-- Personalization Section -->
           <div class="profile-section">
             <h4><i class="fas fa-palette"></i> Personalization</h4>

@@ -42,6 +42,14 @@
             <button class="back-to-summary-btn">
               <i class="fas fa-arrow-left"></i> Back to Summary
             </button>
+            <div class="mindmap-actions">
+              <button class="mindmap-btn save-btn" id="saveMindMapBtn">
+                <i class="fas fa-save"></i> Save
+              </button>
+              <button class="mindmap-btn export-btn" id="exportPdfBtn">
+                <i class="fas fa-file-pdf"></i> Export PDF
+              </button>
+            </div>
           </div>
 
           <!-- Mind Map Canvas -->
@@ -60,6 +68,9 @@
     <script src="../js/main.js"></script>
     <!-- D3.js library for visualization -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <!-- html2canvas and jspdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Page-Specific JS -->
     <script src="../js/mindmap.js"></script>
   </body>

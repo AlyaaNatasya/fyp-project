@@ -137,7 +137,8 @@ function initPageAfterLoad() {
       "quizzes.html": "Quizzes",
       "timer.html": "Timer",
       "profile.html": "Profile",
-      "collection-detail.html": "Collection"
+      "collection-detail.html": "Collection",
+      "mindmaps.html": "My Mind Maps"
     };
     const activeText = linkMap[currentPage];
 
