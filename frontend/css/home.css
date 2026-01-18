@@ -429,6 +429,11 @@
   margin-bottom: 25px;
 }
 
+/* About Us Modal Styles */
+#aboutUsModal .modal-content p {
+  margin-bottom: 15px;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .main-content {

@@ -63,6 +63,7 @@ function initTimerPage() {
   let totalSeconds = 0;
   let initialSeconds = 0; // ✅ Store initial time
   let isRunning = false;
+  let currentMode = ""; // Track current mode: "speed" or "pomodoro"
   let currentPomodoroPhase = "study"; // Track current phase for Pomodoro: "study" or "break"
 
   // --- Timer Mode Selection ---
@@ -74,6 +75,9 @@ function initTimerPage() {
       // Show timer screen
       modeSelection.style.display = "none";
       timerScreen.style.display = "block";
+
+      // Set current mode
+      currentMode = mode;
 
       // Set mode title
       timerMode.textContent = `${title} Mode`;
@@ -111,8 +115,9 @@ function initTimerPage() {
     timerScreen.style.display = "none";
     modeSelection.style.display = "block";
     resetTimer();
-    // Reset the Pomodoro phase when going back to mode selection
+    // Reset the Pomodoro phase and mode when going back to mode selection
     currentPomodoroPhase = "study";
+    currentMode = "";
   });
 
   // --- Timer Functions ---
@@ -123,6 +128,69 @@ function initTimerPage() {
     const secs = (totalSeconds % 60).toString().padStart(2, "0");
     minutesDisplay.textContent = mins;
     secondsDisplay.textContent = secs;
+  }
+
+  // Play notification sound
+  function playNotificationSound() {
+    // Create audio context for beep sound
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800; // 800 Hz tone
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  }
+
+  // Show timer completion modal
+  function showCompletionModal(title, message, buttonText, onContinue, showSecondaryButton = false, secondaryButtonText = "", onSecondary = null) {
+    const modal = document.getElementById("timerCompletionModal");
+    const modalTitle = document.getElementById("timer-modal-title");
+    const modalMessage = document.getElementById("timer-modal-message");
+    const modalBtn = document.getElementById("timer-modal-btn");
+    const modalBtnSecondary = document.getElementById("timer-modal-btn-secondary");
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modalBtn.textContent = buttonText;
+
+    // Show or hide secondary button
+    if (showSecondaryButton) {
+      modalBtnSecondary.style.display = "block";
+      modalBtnSecondary.textContent = secondaryButtonText;
+    } else {
+      modalBtnSecondary.style.display = "none";
+    }
+
+    modal.style.display = "flex";
+
+    // Remove old event listeners
+    const newBtn = modalBtn.cloneNode(true);
+    const newBtnSecondary = modalBtnSecondary.cloneNode(true);
+    modalBtn.parentNode.replaceChild(newBtn, modalBtn);
+    modalBtnSecondary.parentNode.replaceChild(newBtnSecondary, modalBtnSecondary);
+
+    // Add click handler for primary button
+    newBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+      onContinue();
+    });
+
+    // Add click handler for secondary button if it exists
+    if (showSecondaryButton && onSecondary) {
+      newBtnSecondary.addEventListener("click", () => {
+        modal.style.display = "none";
+        onSecondary();
+      });
+    }
   }
 
   function startTimer() {
@@ -137,31 +205,69 @@ function initTimerPage() {
         totalSeconds--;
         updateTimerDisplay();
       } else {
-        // Timer finished, handle Pomodoro cycle
+        // Timer finished
         pauseTimer();
+        playNotificationSound();
 
-        if (currentPomodoroPhase === "study") {
-          // Study time is over, switch to break
-          currentPomodoroPhase = "break";
-          timerMode.textContent = "Pomodoro Break Mode";
-          timerMode.classList.remove("study");
-          timerMode.classList.add("break"); // Add break class for styling
-          initialSeconds = 5 * 60; // 5 minutes break
-          totalSeconds = initialSeconds;
-          alert("Study time is over! Now take a 5-minute break to refresh your mind.");
-        } else if (currentPomodoroPhase === "break") {
-          // Break time is over, switch back to study
-          currentPomodoroPhase = "study";
-          timerMode.textContent = "Pomodoro Study Mode";
-          timerMode.classList.remove("break");
-          timerMode.classList.add("study"); // Add study class for styling
-          initialSeconds = 25 * 60; // 25 minutes study time
-          totalSeconds = initialSeconds;
-          alert("Break time is over! Let's get back to studying.");
+        if (currentMode === "speed") {
+          // Speed mode completed - ask if user wants to continue
+          showCompletionModal(
+            "Speed Mode Completed!",
+            "You just completed the 5 minutes speed mode! Do you want to continue?",
+            "Continue",
+            () => {
+              // Continue - restart the timer
+              totalSeconds = initialSeconds;
+              updateTimerDisplay();
+              startTimer();
+            },
+            true, // Show secondary button
+            "Don't Continue",
+            () => {
+              // Don't continue - go back to mode selection
+              timerScreen.style.display = "none";
+              modeSelection.style.display = "block";
+              resetTimer();
+            }
+          );
+        } else if (currentMode === "pomodoro") {
+          // Pomodoro mode - handle study/break cycle
+          if (currentPomodoroPhase === "study") {
+            // Study time is over, switch to break
+            showCompletionModal(
+              "Time's Up!",
+              "5 minutes break",
+              "Start Break",
+              () => {
+                currentPomodoroPhase = "break";
+                timerMode.textContent = "Pomodoro Break Mode";
+                timerMode.classList.remove("study");
+                timerMode.classList.add("break");
+                initialSeconds = 5 * 60;
+                totalSeconds = initialSeconds;
+                updateTimerDisplay();
+                startTimer();
+              }
+            );
+          } else if (currentPomodoroPhase === "break") {
+            // Break time is over, switch back to study
+            showCompletionModal(
+              "Break Over!",
+              "Continue study",
+              "Start Study",
+              () => {
+                currentPomodoroPhase = "study";
+                timerMode.textContent = "Pomodoro Study Mode";
+                timerMode.classList.remove("break");
+                timerMode.classList.add("study");
+                initialSeconds = 25 * 60;
+                totalSeconds = initialSeconds;
+                updateTimerDisplay();
+                startTimer();
+              }
+            );
+          }
         }
-
-        updateTimerDisplay();
-        startTimer(); // Automatically start the next phase
       }
     }, 1000);
 

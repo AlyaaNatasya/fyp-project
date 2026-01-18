@@ -279,26 +279,147 @@
   .timer-display {
     font-size: 2.5rem;
   }
-  
+
   .timer-screen {
     padding: 20px 15px;
   }
-  
+
   .timer-screen h2 {
     font-size: 1.5rem;
   }
-  
+
   .mode-card {
     width: 100%;
     max-width: 200px;
     height: 180px;
   }
-  
+
   .mode-card i {
     font-size: 2rem;
   }
-  
+
   .header h1 {
     font-size: 1.5rem;
+  }
+}
+
+/* Timer Completion Modal */
+.timer-completion-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  animation: fadeIn 0.3s ease;
+}
+
+.timer-modal-content {
+  background-color: white;
+  padding: 40px 50px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  animation: slideIn 0.3s ease;
+}
+
+.timer-modal-icon {
+  width: 80px;
+  height: 80px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+}
+
+.timer-modal-icon i {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.timer-modal-content h3 {
+  font-size: 1.8rem;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+}
+
+.timer-modal-content p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.timer-modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.timer-modal-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  font-size: 1.1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  flex: 1;
+}
+
+.timer-modal-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(193, 148, 110, 0.4);
+}
+
+.timer-modal-btn.secondary {
+  background-color: #ddd;
+  color: #333;
+}
+
+.timer-modal-btn.secondary:hover {
+  background-color: #ccc;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 576px) {
+  .timer-modal-content {
+    padding: 30px 25px;
+  }
+
+  .timer-modal-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .timer-modal-icon i {
+    font-size: 2rem;
+  }
+
+  .timer-modal-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .timer-modal-content p {
+    font-size: 1rem;
+  }
+
+  .timer-modal-buttons {
+    flex-direction: column;
+  }
+
+  .timer-modal-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
   }
 }
