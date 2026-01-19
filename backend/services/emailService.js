@@ -1,13 +1,13 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // Create email transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
+      pass: process.env.EMAIL_PASS,
+    },
   });
 };
 
@@ -20,7 +20,14 @@ const createTransporter = () => {
  * @param {string} reminderDate - Due date of the reminder
  * @param {string} reminderCategory - Category of the reminder
  */
-const sendReminderEmail = async (userEmail, userName, reminderTitle, reminderDescription, reminderDate, reminderCategory) => {
+const sendReminderEmail = async (
+  userEmail,
+  userName,
+  reminderTitle,
+  reminderDescription,
+  reminderDate,
+  reminderCategory,
+) => {
   try {
     const transporter = createTransporter();
 
@@ -116,9 +123,9 @@ const sendReminderEmail = async (userEmail, userName, reminderTitle, reminderDes
               <div class="reminder-card">
                 <div class="reminder-title">${reminderTitle}</div>
                 <div class="reminder-info">
-                  ${reminderDescription ? `<p>${reminderDescription}</p>` : ''}
-                  <div class="reminder-date">📅 Due Date: ${new Date(reminderDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                  ${reminderCategory ? `<span class="category-badge">${reminderCategory}</span>` : ''}
+                  ${reminderDescription ? `<p>${reminderDescription}</p>` : ""}
+                  <div class="reminder-date">📅 Due Date: ${new Date(reminderDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+                  ${reminderCategory ? `<span class="category-badge">${reminderCategory}</span>` : ""}
                 </div>
               </div>
               
@@ -126,24 +133,24 @@ const sendReminderEmail = async (userEmail, userName, reminderTitle, reminderDes
               <p>Best regards,<br>NotePetal Team ♥</p>
             </div>
             <div class="footer">
-              <p>You received this email because you have reminders set up in your StudyBloom account.</p>
+              <p>You received this email because you have reminders set up in your NotePetal account.</p>
               <p><a href="http://127.0.0.1:5001/pages/calendar.html">Manage your reminders</a></p>
             </div>
           </div>
         </body>
         </html>
-      `
+      `,
     };
 
     await transporter.sendMail(mailOptions);
     console.log(`Reminder email sent successfully to ${userEmail}`);
     return true;
   } catch (error) {
-    console.error('Error sending reminder email:', error);
+    console.error("Error sending reminder email:", error);
     return false;
   }
 };
 
 module.exports = {
-  sendReminderEmail
+  sendReminderEmail,
 };
