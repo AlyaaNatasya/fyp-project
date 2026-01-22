@@ -103,3 +103,7 @@ coverage.xml
 *.cover
 *.log
 .git/modules/
+
+# UAT Documents
+UAT_Conducting_Instructions.md
+UAT_Questionnaire_Template.md
