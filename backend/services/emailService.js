@@ -134,7 +134,7 @@ const sendReminderEmail = async (
             </div>
             <div class="footer">
               <p>You received this email because you have reminders set up in your NotePetal account.</p>
-              <p><a href="http://127.0.0.1:5001/pages/calendar.html">Manage your reminders</a></p>
+              <p><a href="${process.env.FRONTEND_URL || 'http://127.0.0.1:5001'}/pages/calendar.html">Manage your reminders</a></p>
             </div>
           </div>
         </body>

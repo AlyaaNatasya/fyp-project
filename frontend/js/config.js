@@ -2,11 +2,12 @@
 // Centralized configuration for frontend
 
 const CONFIG = {
-  // Backend API URL - Using IP address for consistent resolution
-  BACKEND_URL: "http://127.0.0.1:5001",
+  // Backend API URL - Use relative path for production, or absolute URL for development
+  // In production, frontend and backend are served from the same domain
+  BACKEND_URL: window.location.origin || "http://127.0.0.1:5001",
 
-  // Alternative: You can use this if you prefer localhost
-  // BACKEND_URL: "http://localhost:5001",
+  // Alternative: Uncomment this for local development
+  // BACKEND_URL: "http://127.0.0.1:5001",
   
   // Timeout settings (in milliseconds)
   REQUEST_TIMEOUT: 300000, // 5 minutes for AI processing
