@@ -60,9 +60,18 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://d3js.org", "https://cdn.jsdelivr.net"],
+        scriptSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "https://d3js.org",
+          "https://cdn.jsdelivr.net",
+        ],
         workerSrc: ["'self'", "blob:"], // Allow web workers from same origin and blob URLs for PDF.js
-        connectSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"], // Allow connections to CDNs for source maps
+        connectSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
+        ], // Allow connections to CDNs for source maps
         imgSrc: ["'self'", "data:", "blob:", "https://cdnjs.cloudflare.com"], // Allow images from same origin, data URLs, blob URLs, and cdnjs
         styleSrc: [
           "'self'",
@@ -77,7 +86,7 @@ app.use(
         ], // Allow fonts from same origin, cdnjs, and Google Fonts
       },
     },
-  })
+  }),
 );
 app.use(cors(corsOptions)); // Enable CORS with options
 app.use(morgan("dev")); // Logging
@@ -114,12 +123,11 @@ app.get("/api", (req, res) => {
 app.set("trust proxy", true); // Trust proxy if behind nginx/load balancer
 
 // Start server with increased timeout (5 minutes) to handle long AI processing
-// Use 127.0.0.1 for production (behind Nginx), 0.0.0.0 for direct access
-const HOST = process.env.HOST || "127.0.0.1";
-const server = app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running at http://${HOST}:${PORT}`);
-  console.log("Open your frontend at http://${HOST}:${PORT}/pages/home.html");
-  
+const server = app.listen(PORT, "127.0.0.1", () => {
+  console.log(`🚀 Server running at http://127.0.0.1:${PORT}`);
+  console.log("Open your frontend at http://127.0.0.1:5001/pages/home.html");
+  console.log("Local development: http://127.0.0.1:5001/pages/home.html");
+
   // Start the reminder scheduler
   startReminderScheduler();
 });
