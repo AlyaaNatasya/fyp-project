@@ -94,6 +94,8 @@ const getMindMapById = async (req, res) => {
       });
     }
 
+    const mindmap = rows[0];
+
     let parsedData;
     if (typeof mindmap.mindmap_data === 'string') {
       try {
