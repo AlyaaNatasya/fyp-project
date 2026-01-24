@@ -123,10 +123,11 @@ app.get("/api", (req, res) => {
 app.set("trust proxy", true); // Trust proxy if behind nginx/load balancer
 
 // Start server with increased timeout (5 minutes) to handle long AI processing
-const server = app.listen(PORT, "127.0.0.1", () => {
-  console.log(`🚀 Server running at http://127.0.0.1:${PORT}`);
-  console.log("Open your frontend at http://127.0.0.1:5001/pages/home.html");
-  console.log("Local development: http://127.0.0.1:5001/pages/home.html");
+// Use 127.0.0.1 for production (behind Nginx), 0.0.0.0 for direct access
+const HOST = process.env.HOST || "127.0.0.1";
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running at http://${HOST}:${PORT}`);
+  console.log("Open your frontend at http://${HOST}:${PORT}/pages/home.html");
 
   // Start the reminder scheduler
   startReminderScheduler();
