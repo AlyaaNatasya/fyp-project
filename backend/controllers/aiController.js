@@ -112,8 +112,8 @@ const generateSummaryFromUpload = async (req, res) => {
     const connection = await pool.getConnection();
     // Initially store the temporary file path, will be updated after processing if we preserve the file
     const [result] = await connection.execute(
-      "INSERT INTO summaries (user_id, original_filename, status, file_path) VALUES (?, ?, ?, ?)",
-      [userId, req.file.originalname, "processing", req.file.path]
+      "INSERT INTO summaries (user_id, original_filename, status, file_path, summary_text) VALUES (?, ?, ?, ?, ?)",
+      [userId, req.file.originalname, "processing", req.file.path, "Generating summary..."]
     );
     const summaryId = result.insertId;
     connection.release(); // Release connection
