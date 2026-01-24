@@ -94,7 +94,17 @@ const getMindMapById = async (req, res) => {
       });
     }
 
-    const mindmap = rows[0];
+    let parsedData;
+    if (typeof mindmap.mindmap_data === 'string') {
+      try {
+        parsedData = JSON.parse(mindmap.mindmap_data);
+      } catch (e) {
+        console.error("Error parsing mindmap JSON:", e);
+        parsedData = {}; // Fallback
+      }
+    } else {
+      parsedData = mindmap.mindmap_data;
+    }
 
     res.status(200).json({
       success: true,
@@ -102,7 +112,7 @@ const getMindMapById = async (req, res) => {
         id: mindmap.id,
         title: mindmap.title,
         summary_id: mindmap.summary_id,
-        mindmap_data: JSON.parse(mindmap.mindmap_data),
+        mindmap_data: parsedData,
         created_at: mindmap.created_at,
         updated_at: mindmap.updated_at,
       },
