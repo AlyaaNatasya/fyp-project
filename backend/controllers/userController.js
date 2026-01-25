@@ -251,7 +251,7 @@ const sendEmailUpdateOTP = async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: current_email,
-      subject: 'Email Update Verification - StudyBloom',
+      subject: 'Email Update Verification - NotePetal',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #c1946e;">Email Update Request</h2>
@@ -263,7 +263,7 @@ const sendEmailUpdateOTP = async (req, res) => {
           </div>
           <p>This OTP will expire in 15 minutes.</p>
           <p>If you didn't request this email update, please ignore this email.</p>
-          <p>Best regards,<br>The StudyBloom Team</p>
+          <p>Best regards,<br>The NotePetal Team</p>
         </div>
       `
     };

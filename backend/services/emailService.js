@@ -32,7 +32,7 @@ const sendReminderEmail = async (
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: `"StudyBloom" <${process.env.EMAIL_USER}>`,
+      from: `"NotePetal" <${process.env.EMAIL_USER}>`,
       to: userEmail,
       subject: `📅 Reminder: ${reminderTitle} is due tomorrow!`,
       html: `
