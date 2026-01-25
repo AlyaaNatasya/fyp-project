@@ -31,11 +31,19 @@ const corsOptions = {
     }
 
     // For production, you would check against your production frontend URL
-    if (
-      process.env.NODE_ENV === "production" &&
-      origin === process.env.FRONTEND_URL
-    ) {
-      return callback(null, true);
+    if (process.env.NODE_ENV === "production") {
+      const allowed = [
+        process.env.FRONTEND_URL,
+        'http://notepetal.site',
+        'https://notepetal.site',
+        'http://www.notepetal.site',
+        'https://www.notepetal.site',
+        'http://165.245.185.70'
+      ];
+      
+      if (allowed.includes(origin)) {
+        return callback(null, true);
+      }
     }
 
     callback(new Error("Not allowed by CORS"));
