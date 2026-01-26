@@ -2,6 +2,36 @@
 const axios = require('axios');
 
 /**
+ * Helper function to retry a promise-returning function with exponential backoff
+ * @param {Function} fn - The function to retry
+ * @param {number} retries - Number of retries (default: 3)
+ * @param {number} delay - Initial delay in ms (default: 2000)
+ */
+async function retryRequest(fn, retries = 3, delay = 2000) {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries === 0 || !isRetryableError(error)) {
+      throw error;
+    }
+    console.log(`Request failed, retrying in ${delay}ms... (${retries} retries left)`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryRequest(fn, retries - 1, delay * 2);
+  }
+}
+
+/**
+ * Check if the error is retryable (e.g., network errors, 5xx server errors)
+ * @param {Error} error - The error object
+ * @returns {boolean}
+ */
+function isRetryableError(error) {
+  if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') return true;
+  if (error.response && error.response.status >= 500) return true;
+  return false;
+}
+
+/**
  * Send text to the DeepSeek API for summarization
  * @param {string} text - The text to summarize
  * @returns {Promise<string>} - The generated summary
@@ -34,8 +64,8 @@ async function generateSummary(text) {
     // Prepare the prompt for summarization
     const prompt = `Generate a comprehensive and informative summary of the following academic content. Include all key concepts, main points, and important details from the entire document. Structure the summary with clear headings, bullet points, and paragraphs as appropriate. Use markdown formatting to make the summary well-organized and easy to read:\n\n${cleanText}`;
 
-    // Call the DeepSeek API
-    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+    // Call the DeepSeek API with retry logic
+    const response = await retryRequest(() => axios.post('https://api.deepseek.com/chat/completions', {
       model: "deepseek-chat",  // Using the chat model; you can also use "deepseek-coder" for code-related content
       messages: [
         {
@@ -55,8 +85,8 @@ async function generateSummary(text) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      timeout: 60000, // 60 second timeout for API call
-    });
+      timeout: 300000, // 300 second (5 min) timeout for API call
+    }));
 
     console.log('Received response from DeepSeek API:', response.status);
     
@@ -140,8 +170,8 @@ async function generateMindMap(text) {
     // Prepare the prompt for mind map generation
     const prompt = `Analyze the following academic content and convert it into a hierarchical mind map structure in JSON format. The mind map should have a central topic and multiple levels of branches. Each node should have an 'id', 'name', and 'children' array. The structure should represent the key concepts and their relationships in a hierarchical way:\n\n${cleanText}\n\nPlease return ONLY a valid JSON object in the following format:\n{\n  "name": "Central Topic",\n  "children": [\n    {\n      "name": "Main Branch 1",\n      "children": [\n        {\n          "name": "Sub-branch 1",\n          "children": []\n        }\n      ]\n    }\n  ]\n}`;
 
-    // Call the DeepSeek API
-    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+    // Call the DeepSeek API with retry logic
+    const response = await retryRequest(() => axios.post('https://api.deepseek.com/chat/completions', {
       model: "deepseek-chat",  // Using the chat model
       messages: [
         {
@@ -161,8 +191,8 @@ async function generateMindMap(text) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      timeout: 60000, // 60 second timeout for API call
-    });
+      timeout: 300000, // 300 second (5 min) timeout for API call
+    }));
 
     console.log('Received response from DeepSeek API for mind map:', response.status);
 
@@ -171,11 +201,11 @@ async function generateMindMap(text) {
       let content = response.data.choices[0].message.content;
 
       // Extract JSON from the response if it's wrapped in markdown code blocks
-      let mindMapText = content;
-      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```|```([\s\S]*?)```/);
-      if (jsonMatch) {
-        mindMapText = jsonMatch[1] || jsonMatch[2] || content;
-      }
+      let mindMapText = content.trim();
+      // Remove markdown code blocks if present (start)
+      mindMapText = mindMapText.replace(/^```(?:json)?\s*/i, "");
+      // Remove markdown code blocks if present (end)
+      mindMapText = mindMapText.replace(/\s*```$/, "");
 
       try {
         // Parse the JSON response
@@ -276,8 +306,8 @@ async function generateFlashcards(text) {
     // Prepare the prompt for flashcard generation
     const prompt = `Analyze the following academic content and generate a set of flashcards. Each flashcard should have a 'front' (the question or concept) and a 'back' (the answer or definition). Return ONLY a valid JSON object with the following structure:\n{\n  "flashcards": [\n    {\n      "front": "Question 1",\n      "back": "Answer 1"\n    },\n    {\n      "front": "Question 2",\n      "back": "Answer 2"\n    }\n  ]\n}\n\nText to analyze:\n\n${cleanText}`;
 
-    // Call the DeepSeek API
-    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+    // Call the DeepSeek API with retry logic
+    const response = await retryRequest(() => axios.post('https://api.deepseek.com/chat/completions', {
       model: "deepseek-chat",
       messages: [
         {
@@ -297,8 +327,8 @@ async function generateFlashcards(text) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      timeout: 60000,
-    });
+      timeout: 300000,
+    }));
 
     console.log('Received response from DeepSeek API for flashcards:', response.status);
 
@@ -307,11 +337,11 @@ async function generateFlashcards(text) {
       let content = response.data.choices[0].message.content;
 
       // Extract JSON from the response if it's wrapped in markdown code blocks
-      let jsonText = content;
-      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```|```([\s\S]*?)```/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[1] || jsonMatch[2] || content;
-      }
+      let jsonText = content.trim();
+      // Remove markdown code blocks if present (start)
+      jsonText = jsonText.replace(/^```(?:json)?\s*/i, "");
+      // Remove markdown code blocks if present (end)
+      jsonText = jsonText.replace(/\s*```$/, "");
 
       try {
         // Parse the JSON response
@@ -400,8 +430,8 @@ async function generateQuiz(text) {
     Text to analyze:
     ${cleanText}`;
 
-    // Call the DeepSeek API
-    const response = await axios.post('https://api.deepseek.com/chat/completions', {
+    // Call the DeepSeek API with retry logic
+    const response = await retryRequest(() => axios.post('https://api.deepseek.com/chat/completions', {
       model: "deepseek-chat",
       messages: [
         {
@@ -421,8 +451,8 @@ async function generateQuiz(text) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      timeout: 60000,
-    });
+      timeout: 300000,
+    }));
 
     console.log('Received response from DeepSeek API for quiz:', response.status);
 
@@ -431,11 +461,11 @@ async function generateQuiz(text) {
       let content = response.data.choices[0].message.content;
 
       // Extract JSON from the response if it's wrapped in markdown code blocks
-      let jsonText = content;
-      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```|```([\s\S]*?)```/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[1] || jsonMatch[2] || content;
-      }
+      let jsonText = content.trim();
+      // Remove markdown code blocks if present (start)
+      jsonText = jsonText.replace(/^```(?:json)?\s*/i, "");
+      // Remove markdown code blocks if present (end)
+      jsonText = jsonText.replace(/\s*```$/, "");
 
       try {
         // Parse the JSON response
