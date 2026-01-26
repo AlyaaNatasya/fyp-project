@@ -78,7 +78,7 @@ async function generateSummary(text) {
         }
       ],
       temperature: 0.3, // Lower temperature for more consistent summaries
-      max_tokens: 2000, // Increased from 1000 to 2000 to allow for more comprehensive summaries
+      max_tokens: 8000, // Increased to prevent truncation
       stream: false // Set to false to get complete response
     }, {
       headers: {
@@ -184,7 +184,7 @@ async function generateMindMap(text) {
         }
       ],
       temperature: 0.2, // Lower temperature for more consistent structure
-      max_tokens: 2000, // Increased for more detailed structure
+      max_tokens: 8000, // Increased to prevent truncation
       stream: false // Set to false to get complete response
     }, {
       headers: {
@@ -320,7 +320,7 @@ async function generateFlashcards(text) {
         }
       ],
       temperature: 0.2,
-      max_tokens: 2000,
+      max_tokens: 8000,
       stream: false
     }, {
       headers: {
@@ -444,7 +444,7 @@ async function generateQuiz(text) {
         }
       ],
       temperature: 0.2,
-      max_tokens: 2000,
+      max_tokens: 8000,
       stream: false
     }, {
       headers: {
